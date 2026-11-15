@@ -41,16 +41,19 @@ export function cleanCaption(caption = '') {
     .trim();
 }
 
-/** Save one image as a web copy (max 1600 px) and a small thumbnail (480 px). */
-export async function saveImage(buffer, base) {
+/** Save one image as a web copy (longest side `max` px) and a small thumbnail. */
+export async function saveImage(buffer, base, { max = 1600, thumb = 480, quality = 84 } = {}) {
   await fs.mkdir(MEDIA, { recursive: true });
   const img = sharp(buffer).rotate();
   const meta = await img.metadata();
-  await img.clone().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: 84, mozjpeg: true }).toFile(path.join(MEDIA, `${base}.jpg`));
-  await img.clone().resize({ width: 480, height: 480, fit: 'inside' })
+  await img.clone().resize({ width: max, height: max, fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality, mozjpeg: true }).toFile(path.join(MEDIA, `${base}.jpg`));
+  await img.clone().resize({ width: thumb, height: thumb, fit: 'inside' })
     .jpeg({ quality: 78, mozjpeg: true }).toFile(path.join(MEDIA, `${base}-sm.jpg`));
-  const w = Math.min(meta.width, 1600), h = Math.round(meta.height * (w / meta.width));
+  // EXIF orientations 5-8 are rotated a quarter turn, so width and height swap.
+  const [ow, oh] = (meta.orientation || 1) >= 5 ? [meta.height, meta.width] : [meta.width, meta.height];
+  const scale = Math.min(1, max / Math.max(ow, oh));
+  const w = Math.round(ow * scale), h = Math.round(oh * scale);
   return { file: `${base}.jpg`, thumb: `${base}-sm.jpg`, w, h };
 }
 
