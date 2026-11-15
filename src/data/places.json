@@ -1,0 +1,120 @@
+{
+  "places": {
+    "twelve-apostles": {
+      "name": "Twelve Apostles, Victoria",
+      "lat": -38.6655,
+      "lng": 143.1044,
+      "tags": [
+        "Coast"
+      ],
+      "title": "The Apostles at First Light",
+      "story": "Three dawns on the Great Ocean Road waiting for the swell to drop and the sea fog to lift off the stacks."
+    },
+    "cape-schanck": {
+      "name": "Cape Schanck, Victoria",
+      "lat": -38.4925,
+      "lng": 144.8853,
+      "tags": [
+        "Coast"
+      ]
+    },
+    "brighton-beach": {
+      "name": "Brighton Beach, Melbourne",
+      "lat": -37.9176,
+      "lng": 144.9866,
+      "tags": [
+        "Coast",
+        "Melbourne"
+      ],
+      "title": "Bathing Boxes"
+    },
+    "hosier-lane": {
+      "name": "Hosier Lane, Melbourne",
+      "lat": -37.8166,
+      "lng": 144.9692,
+      "tags": [
+        "City",
+        "Melbourne",
+        "Night"
+      ],
+      "title": "Laneways After Dark",
+      "story": "Melbourne after the trams stop: wet bluestone, paint still drying on the walls, and the city glowing over the Yarra."
+    },
+    "dandenong-ranges": {
+      "name": "Dandenong Ranges, Victoria",
+      "lat": -37.8503,
+      "lng": 145.3514,
+      "tags": [
+        "Forest"
+      ],
+      "title": "Mountain Ash Mornings"
+    },
+    "phillip-island": {
+      "name": "Phillip Island, Victoria",
+      "lat": -38.4876,
+      "lng": 145.239,
+      "tags": [
+        "Coast"
+      ]
+    },
+    "wilsons-prom": {
+      "name": "Wilsons Promontory, Victoria",
+      "lat": -39.03,
+      "lng": 146.32,
+      "tags": [
+        "Coast"
+      ],
+      "title": "The Prom",
+      "story": "Squeaky Beach, Tidal River and the granite boulders of Picnic Bay, walked over a long weekend in winter."
+    },
+    "grampians": {
+      "name": "The Pinnacle, Grampians",
+      "lat": -37.165,
+      "lng": 142.522,
+      "tags": [
+        "Mountains"
+      ],
+      "title": "Gariwerd from the Pinnacle"
+    },
+    "cradle-mountain": {
+      "name": "Cradle Mountain, Tasmania",
+      "lat": -41.6837,
+      "lng": 145.9512,
+      "tags": [
+        "Mountains"
+      ],
+      "title": "Cradle in the Snow"
+    },
+    "uluru": {
+      "name": "Uluru, Northern Territory",
+      "lat": -25.3444,
+      "lng": 131.0369,
+      "tags": [
+        "Desert"
+      ],
+      "title": "Red Centre"
+    },
+    "kyoto": {
+      "name": "Higashiyama, Kyoto",
+      "lat": 35.0036,
+      "lng": 135.7785,
+      "tags": [
+        "City",
+        "Travel"
+      ],
+      "title": "Kyoto in Autumn"
+    },
+    "reine": {
+      "name": "Reine, Norway",
+      "lat": 67.9324,
+      "lng": 13.0888,
+      "tags": [
+        "Coast",
+        "Night",
+        "Travel"
+      ],
+      "title": "Lofoten in February"
+    }
+  },
+  "posts": {}
+}

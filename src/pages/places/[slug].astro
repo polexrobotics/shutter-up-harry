@@ -1,0 +1,59 @@
+---
+// A plain, shareable page per place: good for search engines, link previews and people without JavaScript.
+import Base from '../../layouts/Base.astro';
+import { getSeries } from '../../lib/series.js';
+import site from '../../site.config.js';
+export function getStaticPaths() {
+  const all = getSeries();
+  return all.map((s) => ({ params: { slug: s.slug }, props: { s, all } }));
+}
+const { s, all } = Astro.props;
+const fmt = (iso) => new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Melbourne' });
+const idx = all.findIndex((x) => x.slug === s.slug);
+const next = all[(idx + 1) % all.length];
+---
+<Base title={s.title} description={`${s.title}: ${s.photos.length} photographs from ${s.place} by ${site.name}.`} image={s.cover.src}>
+  <main class="place-page">
+    <nav class="pp-nav"><a href="/" class="brand"><b>{site.name}</b><span>{site.tagline}</span></a><a class="pillbtn" href={`/#${s.slug}`}>See it on the map</a></nav>
+    <header class="pp-head">
+      <img class="pp-cover" src={s.cover.src} alt={s.cover.caption} width={s.cover.w} height={s.cover.h} />
+      <div class="pp-title">
+        <div class="where"><span>{s.place}</span><span class="mono">{Math.abs(s.lat).toFixed(2)}° {s.lat >= 0 ? 'N' : 'S'}, {Math.abs(s.lng).toFixed(2)}° {s.lng >= 0 ? 'E' : 'W'}</span></div>
+        <h1>{s.title}</h1>
+        {s.story && <p class="story">{s.story}</p>}
+        <div class="tags">{s.tags.map((t) => <span class="tag">{t}</span>)}<span class="tag">{s.dates}</span><span class="tag">{s.photos.length} photos</span></div>
+      </div>
+    </header>
+    <section class="pp-grid">
+      {s.photos.map((ph) => (
+        <figure>
+          <a href={ph.src}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} /></a>
+          <figcaption>{ph.caption} <span class="mono">{fmt(ph.date)}</span> <a href={ph.permalink} rel="noopener">Instagram ↗</a></figcaption>
+        </figure>
+      ))}
+    </section>
+    <footer class="pp-foot">
+      <a href={`mailto:${site.email}?subject=${encodeURIComponent(`Print enquiry: ${s.title}`)}`}>Ask {site.name} about a print</a>
+      <a href={`/places/${next.slug}/`}>Next place: {next.title} →</a>
+    </footer>
+  </main>
+</Base>
+<style>
+  .place-page{max-width:1100px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px, env(safe-area-inset-right,0px)) 48px max(16px, env(safe-area-inset-left,0px));background:var(--surface);min-height:100vh}
+  .pp-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+  .pp-nav .brand{text-decoration:none;color:inherit}
+  .pillbtn{text-decoration:none}
+  .pp-head{display:grid;gap:24px}
+  .pp-cover{width:100%;border-radius:12px;aspect-ratio:3/2;object-fit:cover;height:auto}
+  .pp-title .where{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
+  .pp-title h1{font-family:var(--f-display);font-size:clamp(30px,5vw,48px);line-height:1.05;margin:8px 0 12px;letter-spacing:-.015em;text-wrap:balance}
+  .story{line-height:1.6;max-width:62ch;margin:0}
+  .pp-grid{columns:3 260px;column-gap:12px;margin-top:32px}
+  figure{margin:0 0 12px;break-inside:avoid}
+  figure img{width:100%;height:auto;border-radius:6px;display:block}
+  figcaption{font-size:13px;color:var(--muted);padding:6px 2px 0;display:flex;gap:8px;flex-wrap:wrap}
+  figcaption a{color:var(--muted)}
+  .pp-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:32px;padding-top:20px}
+  .pp-foot a{color:var(--accent);font-weight:500}
+  @media (min-width:900px){.pp-head{grid-template-columns:3fr 2fr;align-items:end}}
+</style>

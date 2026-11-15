@@ -1,0 +1,56 @@
+# Pulls new Instagram posts every morning (Melbourne time) and commits them.
+# The host (Netlify, Vercel or Cloudflare Pages) redeploys automatically on each push.
+name: Instagram sync
+
+on:
+  schedule:
+    - cron: '0 19 * * *'     # 19:00 UTC = 5–6 am in Melbourne
+  workflow_dispatch: {}       # "Run workflow" button for an instant refresh
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fetch posts
+        run: npm run sync
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      - name: Commit changes
+        run: |
+          git config user.name "instagram-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/data public/media sync-report.md
+          git diff --cached --quiet || git commit -m "Sync Instagram posts"
+          git push
+
+  # Instagram tokens expire after 60 days. Refresh weekly and store the new one.
+  # Needs a fine-grained GitHub token with "Secrets: read and write" on this repo, saved as GH_SECRETS_TOKEN.
+  refresh-token:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refresh on Mondays only
+        id: day
+        run: echo "monday=$([ "$(date -u +%u)" = 1 ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        if: steps.day.outputs.monday == 'yes'
+        with:
+          node-version: 22
+      - name: Refresh and save token
+        if: steps.day.outputs.monday == 'yes'
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_SECRETS_TOKEN }}
+        run: |
+          NEW=$(node scripts/refresh-token.mjs)
+          gh secret set IG_ACCESS_TOKEN --body "$NEW" --repo "$GITHUB_REPOSITORY"

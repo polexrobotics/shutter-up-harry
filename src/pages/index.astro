@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { getSeries, allTags } from '../lib/series.js';
+import site from '../site.config.js';
+const series = getSeries();
+const tags = ['All', ...allTags(series)];
+const data = { series, site: { name: site.name, instagram: site.instagram, email: site.email, mapStyle: site.mapStyle } };
+---
+<Base bodyClass="map-page" image={series[0]?.cover.src}>
+  <div id="app">
+    <div id="map" role="application" aria-label="Map of photo series"></div>
+    <header class="topbar">
+      <a class="brand" href="/" style="text-decoration:none;color:inherit"><b>{site.name}</b><span>{site.tagline}</span></a>
+      <div class="chips" id="chips" role="group" aria-label="Filter places">
+        {tags.map((t) => <button class="chip" aria-pressed={t === 'All' ? 'true' : 'false'} data-c={t}>{t}</button>)}
+      </div>
+      <button class="pillbtn" id="listBtn" aria-pressed="false">List</button>
+    </header>
+    <aside class="intro" id="intro">
+      <h1 id="introTitle">Photographs from {series.length} places</h1>
+      <p>Pick a place on the map to see the photos from it. New posts on Instagram appear here automatically.</p>
+    </aside>
+    <div class="strip-label" id="stripLabel">{series.length} places · swipe or tap a pin</div>
+    <div class="strip" id="strip" aria-label="Places"></div>
+    <!-- The list is real HTML so it works without JavaScript and for search engines. -->
+    <section class="list" id="list" hidden>
+      <h2 class="visually-hidden">All places</h2>
+      <div class="list-grid" id="listGrid">
+        {series.map((s) => (
+          <a class="card" href={`/places/${s.slug}/`} data-id={s.slug} data-tags={s.tags.join('|')}>
+            <img alt="" src={s.cover.thumb} loading="lazy" width={s.cover.w} height={s.cover.h} />
+            <div><b>{s.title}</b><span>{s.place} · {s.dates} · {s.photos.length} photos</span></div>
+          </a>
+        ))}
+      </div>
+    </section>
+    <aside class="panel" id="panel" aria-label="Series" aria-hidden="true"></aside>
+    <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Photo"></div>
+  </div>
+  <script type="application/json" id="series-data" set:html={JSON.stringify(data)}></script>
+  <script>import '../scripts/map-app.js';</script>
+</Base>
