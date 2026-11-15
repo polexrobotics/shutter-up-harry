@@ -1,119 +1,379 @@
 {
   "places": {
-    "twelve-apostles": {
-      "name": "Twelve Apostles, Victoria",
-      "lat": -38.6655,
-      "lng": 143.1044,
+    "new-york-city": {
+      "name": "New York City, United States",
+      "lat": 40.7539,
+      "lng": -73.9798,
       "tags": [
-        "Coast"
-      ],
-      "title": "The Apostles at First Light",
-      "story": "Three dawns on the Great Ocean Road waiting for the swell to drop and the sea fog to lift off the stacks."
-    },
-    "cape-schanck": {
-      "name": "Cape Schanck, Victoria",
-      "lat": -38.4925,
-      "lng": 144.8853,
-      "tags": [
-        "Coast"
+        "North America"
       ]
     },
-    "brighton-beach": {
-      "name": "Brighton Beach, Melbourne",
-      "lat": -37.9176,
-      "lng": 144.9866,
+    "san-francisco": {
+      "name": "San Francisco, United States",
+      "lat": 37.7942,
+      "lng": -122.4453,
       "tags": [
-        "Coast",
-        "Melbourne"
-      ],
-      "title": "Bathing Boxes"
-    },
-    "hosier-lane": {
-      "name": "Hosier Lane, Melbourne",
-      "lat": -37.8166,
-      "lng": 144.9692,
-      "tags": [
-        "City",
-        "Melbourne",
-        "Night"
-      ],
-      "title": "Laneways After Dark",
-      "story": "Melbourne after the trams stop: wet bluestone, paint still drying on the walls, and the city glowing over the Yarra."
-    },
-    "dandenong-ranges": {
-      "name": "Dandenong Ranges, Victoria",
-      "lat": -37.8503,
-      "lng": 145.3514,
-      "tags": [
-        "Forest"
-      ],
-      "title": "Mountain Ash Mornings"
-    },
-    "phillip-island": {
-      "name": "Phillip Island, Victoria",
-      "lat": -38.4876,
-      "lng": 145.239,
-      "tags": [
-        "Coast"
+        "North America"
       ]
     },
-    "wilsons-prom": {
-      "name": "Wilsons Promontory, Victoria",
-      "lat": -39.03,
-      "lng": 146.32,
+    "singapore": {
+      "name": "Singapore, Singapore",
+      "lat": 1.3074,
+      "lng": 103.818,
       "tags": [
-        "Coast"
-      ],
-      "title": "The Prom",
-      "story": "Squeaky Beach, Tidal River and the granite boulders of Picnic Bay, walked over a long weekend in winter."
+        "Asia"
+      ]
     },
-    "grampians": {
-      "name": "The Pinnacle, Grampians",
-      "lat": -37.165,
-      "lng": 142.522,
+    "alice-springs": {
+      "name": "Near Alice Springs, Australia",
+      "lat": -25.1907,
+      "lng": 130.9767,
       "tags": [
-        "Mountains"
+        "Australia & NZ"
       ],
-      "title": "Gariwerd from the Pinnacle"
+      "title": "Around Alice Springs"
     },
-    "cradle-mountain": {
-      "name": "Cradle Mountain, Tasmania",
-      "lat": -41.6837,
-      "lng": 145.9512,
+    "athens": {
+      "name": "Athens, Greece",
+      "lat": 37.9766,
+      "lng": 23.7257,
       "tags": [
-        "Mountains"
-      ],
-      "title": "Cradle in the Snow"
+        "Europe"
+      ]
     },
-    "uluru": {
-      "name": "Uluru, Northern Territory",
-      "lat": -25.3444,
-      "lng": 131.0369,
+    "sparta": {
+      "name": "Near Sparta, Greece",
+      "lat": 36.6799,
+      "lng": 22.3772,
       "tags": [
-        "Desert"
+        "Europe"
       ],
-      "title": "Red Centre"
+      "title": "Around Sparta"
+    },
+    "rome": {
+      "name": "Rome, Italy",
+      "lat": 41.8873,
+      "lng": 12.4898,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "florence": {
+      "name": "Florence, Italy",
+      "lat": 43.7833,
+      "lng": 11.25,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "london": {
+      "name": "London, United Kingdom",
+      "lat": 51.5172,
+      "lng": -0.1779,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "philadelphia": {
+      "name": "Philadelphia, United States",
+      "lat": 39.965,
+      "lng": -75.18,
+      "tags": [
+        "North America"
+      ]
+    },
+    "los-angeles": {
+      "name": "Los Angeles, United States",
+      "lat": 34.102,
+      "lng": -118.3409,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Los Angeles"
+    },
+    "irvine": {
+      "name": "Near Irvine, United States",
+      "lat": 33.5315,
+      "lng": -117.769,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Irvine"
+    },
+    "tokyo": {
+      "name": "Tokyo, Japan",
+      "lat": 35.7047,
+      "lng": 139.7761,
+      "tags": [
+        "Asia"
+      ]
+    },
+    "odawara": {
+      "name": "Odawara, Japan",
+      "lat": 35.1956,
+      "lng": 139.037,
+      "tags": [
+        "Asia"
+      ]
+    },
+    "osaka": {
+      "name": "Near Osaka, Japan",
+      "lat": 34.6853,
+      "lng": 135.839,
+      "tags": [
+        "Asia"
+      ],
+      "title": "Around Osaka"
+    },
+    "berlin": {
+      "name": "Berlin, Germany",
+      "lat": 52.5202,
+      "lng": 13.4016,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "prague": {
+      "name": "Prague, Czechia",
+      "lat": 50.0816,
+      "lng": 14.4208,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "chicago": {
+      "name": "Chicago, United States",
+      "lat": 41.8872,
+      "lng": -87.616,
+      "tags": [
+        "North America"
+      ]
+    },
+    "washington": {
+      "name": "Near Washington, United States",
+      "lat": 38.993,
+      "lng": -77.3905,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Washington"
+    },
+    "paris": {
+      "name": "Paris, France",
+      "lat": 48.8693,
+      "lng": 2.3056,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "makassar": {
+      "name": "Makassar, Indonesia",
+      "lat": -5.1617,
+      "lng": 119.4163,
+      "tags": [
+        "Asia"
+      ]
+    },
+    "sydney": {
+      "name": "Sydney, Australia",
+      "lat": -33.8449,
+      "lng": 151.1599,
+      "tags": [
+        "Australia & NZ"
+      ]
+    },
+    "melbourne": {
+      "name": "Melbourne, Australia",
+      "lat": -37.8182,
+      "lng": 144.9695,
+      "tags": [
+        "Australia & NZ"
+      ]
+    },
+    "denpasar": {
+      "name": "Denpasar, Indonesia",
+      "lat": -8.7165,
+      "lng": 115.1708,
+      "tags": [
+        "Asia"
+      ]
+    },
+    "argos": {
+      "name": "Árgos, Greece",
+      "lat": 37.5635,
+      "lng": 22.8088,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "argos-gr": {
+      "name": "Near Árgos, Greece",
+      "lat": 37.2093,
+      "lng": 23.0026,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Árgos"
+    },
+    "sparta-gr": {
+      "name": "Near Sparta, Greece",
+      "lat": 36.7509,
+      "lng": 22.3879,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Sparta"
+    },
+    "kalamata": {
+      "name": "Kalamata, Greece",
+      "lat": 37.0411,
+      "lng": 22.114,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "kalamata-gr": {
+      "name": "Near Kalamata, Greece",
+      "lat": 37.0353,
+      "lng": 21.6411,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Kalamata"
+    },
+    "pyrgos": {
+      "name": "Near Pýrgos, Greece",
+      "lat": 37.6383,
+      "lng": 21.6308,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Pýrgos"
+    },
+    "patra": {
+      "name": "Pátra, Greece",
+      "lat": 38.2466,
+      "lng": 21.6841,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "preveza": {
+      "name": "Préveza, Greece",
+      "lat": 38.9266,
+      "lng": 20.9004,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "mestre": {
+      "name": "Mestre, Italy",
+      "lat": 45.4356,
+      "lng": 12.3357,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "milan": {
+      "name": "Near Milan, Italy",
+      "lat": 45.8107,
+      "lng": 9.0871,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Milan"
+    },
+    "siena": {
+      "name": "Siena, Italy",
+      "lat": 43.3169,
+      "lng": 11.3289,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "naples": {
+      "name": "Near Naples, Italy",
+      "lat": 40.6236,
+      "lng": 14.5712,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Naples"
+    },
+    "san-diego": {
+      "name": "San Diego, United States",
+      "lat": 32.8336,
+      "lng": -117.1971,
+      "tags": [
+        "North America"
+      ]
+    },
+    "chowchilla": {
+      "name": "Near Chowchilla, United States",
+      "lat": 37.7469,
+      "lng": -119.5904,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Chowchilla"
+    },
+    "las-vegas": {
+      "name": "Near Las Vegas, United States",
+      "lat": 36.1238,
+      "lng": -115.3,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Las Vegas"
+    },
+    "bullhead-city": {
+      "name": "Near Bullhead City, United States",
+      "lat": 35.095,
+      "lng": -115.5377,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Bullhead City"
     },
     "kyoto": {
-      "name": "Higashiyama, Kyoto",
-      "lat": 35.0036,
-      "lng": 135.7785,
+      "name": "Kyoto, Japan",
+      "lat": 34.9914,
+      "lng": 135.7659,
       "tags": [
-        "City",
-        "Travel"
-      ],
-      "title": "Kyoto in Autumn"
+        "Asia"
+      ]
     },
-    "reine": {
-      "name": "Reine, Norway",
-      "lat": 67.9324,
-      "lng": 13.0888,
+    "vienna": {
+      "name": "Vienna, Austria",
+      "lat": 48.2028,
+      "lng": 16.3713,
       "tags": [
-        "Coast",
-        "Night",
-        "Travel"
-      ],
-      "title": "Lofoten in February"
+        "Europe"
+      ]
+    },
+    "munich": {
+      "name": "Munich, Germany",
+      "lat": 48.1423,
+      "lng": 11.5767,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "fussen": {
+      "name": "Füssen, Germany",
+      "lat": 47.5576,
+      "lng": 10.7498,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "zurich": {
+      "name": "Zürich, Switzerland",
+      "lat": 47.3772,
+      "lng": 8.5309,
+      "tags": [
+        "Europe"
+      ]
     }
   },
   "posts": {}
