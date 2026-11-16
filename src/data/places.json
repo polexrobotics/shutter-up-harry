@@ -42,13 +42,13 @@
       ]
     },
     "sparta": {
-      "name": "Near Sparta, Greece",
+      "name": "Monemvasia, Greece",
       "lat": 36.6799,
       "lng": 22.3772,
       "tags": [
         "Europe"
       ],
-      "title": "Around Sparta"
+      "title": "Monemvasia"
     },
     "rome": {
       "name": "Rome, Italy",
@@ -92,13 +92,13 @@
       "title": "Around Los Angeles"
     },
     "irvine": {
-      "name": "Near Irvine, United States",
+      "name": "Laguna Beach, California",
       "lat": 33.5315,
       "lng": -117.769,
       "tags": [
         "North America"
       ],
-      "title": "Around Irvine"
+      "title": "Laguna Beach"
     },
     "tokyo": {
       "name": "Tokyo, Japan",
@@ -109,12 +109,13 @@
       ]
     },
     "odawara": {
-      "name": "Odawara, Japan",
+      "name": "Hakone, Japan",
       "lat": 35.1956,
       "lng": 139.037,
       "tags": [
         "Asia"
-      ]
+      ],
+      "title": "Hakone"
     },
     "osaka": {
       "name": "Near Osaka, Japan",
@@ -199,31 +200,31 @@
       ]
     },
     "argos": {
-      "name": "Árgos, Greece",
+      "name": "Nafplio, Greece",
       "lat": 37.5635,
       "lng": 22.8088,
       "tags": [
         "Europe"
       ],
-      "title": "Around Árgos"
+      "title": "Nafplio"
     },
     "kalamata": {
-      "name": "Kalamata, Greece",
+      "name": "Mani & Messinia, Greece",
       "lat": 37.0411,
       "lng": 22.114,
       "tags": [
         "Europe"
       ],
-      "title": "Around Kalamata"
+      "title": "Messinia & Mani"
     },
     "pyrgos": {
-      "name": "Near Pýrgos, Greece",
+      "name": "Ancient Olympia, Greece",
       "lat": 37.6383,
       "lng": 21.6308,
       "tags": [
         "Europe"
       ],
-      "title": "Around Pýrgos"
+      "title": "Ancient Olympia"
     },
     "patra": {
       "name": "Pátra, Greece",
@@ -234,21 +235,22 @@
       ]
     },
     "preveza": {
-      "name": "Préveza, Greece",
+      "name": "Lefkada, Greece",
       "lat": 38.9266,
       "lng": 20.9004,
       "tags": [
         "Europe"
       ],
-      "title": "Around Préveza"
+      "title": "Lefkada"
     },
     "mestre": {
-      "name": "Mestre, Italy",
+      "name": "Venice, Italy",
       "lat": 45.4356,
       "lng": 12.3357,
       "tags": [
         "Europe"
-      ]
+      ],
+      "title": "Venice"
     },
     "milan": {
       "name": "Near Milan, Italy",
@@ -268,13 +270,13 @@
       ]
     },
     "naples": {
-      "name": "Near Naples, Italy",
+      "name": "Amalfi Coast, Italy",
       "lat": 40.6236,
       "lng": 14.5712,
       "tags": [
         "Europe"
       ],
-      "title": "Around Naples"
+      "title": "Amalfi Coast"
     },
     "san-diego": {
       "name": "San Diego, United States",
@@ -285,13 +287,13 @@
       ]
     },
     "chowchilla": {
-      "name": "Near Chowchilla, United States",
+      "name": "Yosemite, California",
       "lat": 37.7469,
       "lng": -119.5904,
       "tags": [
         "North America"
       ],
-      "title": "Around Chowchilla"
+      "title": "Yosemite"
     },
     "las-vegas": {
       "name": "Near Las Vegas, United States",
@@ -303,13 +305,13 @@
       "title": "Around Las Vegas"
     },
     "bullhead-city": {
-      "name": "Near Bullhead City, United States",
+      "name": "Mojave Desert, California",
       "lat": 35.095,
       "lng": -115.5377,
       "tags": [
         "North America"
       ],
-      "title": "Around Bullhead City"
+      "title": "Mojave Desert"
     },
     "kyoto": {
       "name": "Kyoto, Japan",
@@ -336,12 +338,13 @@
       ]
     },
     "fussen": {
-      "name": "Füssen, Germany",
+      "name": "Neuschwanstein, Germany",
       "lat": 47.5576,
       "lng": 10.7498,
       "tags": [
         "Europe"
-      ]
+      ],
+      "title": "Neuschwanstein"
     },
     "zurich": {
       "name": "Zürich, Switzerland",
@@ -417,31 +420,31 @@
       ]
     },
     "enterprise": {
-      "name": "Near Enterprise, United States",
+      "name": "California / Nevada border",
       "lat": 35.6063,
       "lng": -115.3912,
       "tags": [
         "North America"
       ],
-      "title": "Around Enterprise"
+      "title": "California–Nevada border"
     },
     "south-lake-tahoe": {
-      "name": "Near South Lake Tahoe, United States",
+      "name": "Mono Lake, California",
       "lat": 37.9836,
       "lng": -119.068,
       "tags": [
         "North America"
       ],
-      "title": "Around South Lake Tahoe"
+      "title": "Mono Lake"
     },
     "sanger": {
-      "name": "Near Sanger, United States",
+      "name": "Mesa Camp, California",
       "lat": 37.5078,
       "lng": -118.573,
       "tags": [
         "North America"
       ],
-      "title": "Around Sanger"
+      "title": "Mesa Camp"
     },
     "nadi": {
       "name": "Nadi, Fiji",
@@ -467,7 +470,215 @@
         "Australia & NZ"
       ],
       "title": "Around Geelong"
+    },
+    "delphi": {
+      "name": "Delphi, Greece",
+      "lat": 38.4824,
+      "lng": 22.501,
+      "tags": [
+        "Europe"
+      ],
+      "keep": true
     }
   },
-  "posts": {}
+  "posts": {
+    "18006354649996560": {
+      "place": "athens"
+    },
+    "18014731861865027": {
+      "place": "athens"
+    },
+    "17948996195679199": {
+      "place": "athens"
+    },
+    "18026212351653269": {
+      "place": "athens"
+    },
+    "18371327620067973": {
+      "place": "athens"
+    },
+    "18003750746047850": {
+      "place": "athens"
+    },
+    "17995746275167282": {
+      "place": "athens"
+    },
+    "17959263302342362": {
+      "place": "san-francisco"
+    },
+    "17888162375832866": {
+      "place": "san-francisco"
+    },
+    "18118125850307500": {
+      "place": "san-francisco"
+    },
+    "18010408888649694": {
+      "place": "san-francisco"
+    },
+    "18176559364280663": {
+      "place": "san-francisco"
+    },
+    "18003401452762604": {
+      "place": "san-francisco"
+    },
+    "18161139739408647": {
+      "place": "san-francisco"
+    },
+    "18465643708018356": {
+      "place": "san-francisco"
+    },
+    "17934560246833671": {
+      "place": "san-francisco"
+    },
+    "18467454004018288": {
+      "place": "san-francisco"
+    },
+    "17872909764218467": {
+      "place": "san-francisco"
+    },
+    "18361301692022155": {
+      "place": "san-francisco"
+    },
+    "18078980699225924": {
+      "place": "prague"
+    },
+    "18087811780954849": {
+      "place": "prague"
+    },
+    "17912175684124895": {
+      "place": "prague"
+    },
+    "18089401081980697": {
+      "place": "prague"
+    },
+    "17984220803816115": {
+      "place": "odawara"
+    },
+    "18025431145650451": {
+      "place": "rome"
+    },
+    "17896126922892468": {
+      "place": "rome"
+    },
+    "18007232947950585": {
+      "place": "rome"
+    },
+    "18005745557006948": {
+      "place": "rome"
+    },
+    "18330048979000966": {
+      "place": "new-york-city"
+    },
+    "18037907455363137": {
+      "place": "new-york-city"
+    },
+    "18002688763618786": {
+      "place": "new-york-city"
+    },
+    "18039405115389796": {
+      "place": "new-york-city"
+    },
+    "17892924386758661": {
+      "place": "new-york-city"
+    },
+    "18181952218221234": {
+      "place": "new-york-city"
+    },
+    "17937859739514071": {
+      "place": "new-york-city"
+    },
+    "18030018041139180": {
+      "place": "new-york-city"
+    },
+    "18034232812549245": {
+      "place": "new-york-city"
+    },
+    "17946053312204940": {
+      "place": "new-york-city"
+    },
+    "17845839062836872": {
+      "place": "new-york-city"
+    },
+    "17993806276507216": {
+      "place": "new-york-city"
+    },
+    "18328493941151594": {
+      "place": "new-york-city"
+    },
+    "18047482363929455": {
+      "place": "new-york-city"
+    },
+    "17843913597297717": {
+      "place": "new-york-city"
+    },
+    "17992320278690710": {
+      "place": "new-york-city"
+    },
+    "17882494313744569": {
+      "place": "new-york-city"
+    },
+    "17885825759723225": {
+      "place": "new-york-city"
+    },
+    "17969521805024382": {
+      "place": "new-york-city"
+    },
+    "17988319615557938": {
+      "place": "new-york-city"
+    },
+    "18151220692253789": {
+      "place": "new-york-city"
+    },
+    "17905452671842015": {
+      "place": "como"
+    },
+    "17990342789136008": {
+      "place": "como"
+    },
+    "17998016510016924": {
+      "place": "como"
+    },
+    "17991597131477274": {
+      "place": "alice-springs"
+    },
+    "17996113693954505": {
+      "place": "alice-springs"
+    },
+    "18001838957524355": {
+      "place": "los-angeles"
+    },
+    "18014373800447280": {
+      "place": "los-angeles"
+    },
+    "17876551914208961": {
+      "place": "los-angeles"
+    },
+    "18060094831859805": {
+      "place": "los-angeles"
+    },
+    "18098566168444743": {
+      "place": "las-vegas"
+    },
+    "17961349103638232": {
+      "place": "patra"
+    },
+    "18115428955319690": {
+      "place": "patra"
+    },
+    "17851202157051736": {
+      "place": "preveza"
+    },
+    "17998152434147480": {
+      "place": "preveza"
+    },
+    "18000590017899789": {
+      "place": "kalamata"
+    },
+    "18025473934547207": {
+      "place": "singapore"
+    },
+    "18038113864550486": {
+      "place": "delphi"
+    }
+  }
 }

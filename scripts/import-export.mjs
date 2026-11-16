@@ -155,14 +155,15 @@ async function main() {
     for (const p of c.posts) p.place = key;
   }
   // Places that no longer have any posts are removed unless Harry edited them by hand.
-  const used = new Set(posts.map((p) => p.place).filter(Boolean));
+  const used = new Set([...posts.map((p) => p.place), ...Object.values(placeData.posts || {}).map((s) => s.place)].filter(Boolean));
   for (const k of Object.keys(placeData.places)) if (!used.has(k) && !placeData.places[k].keep) delete placeData.places[k];
 
   posts.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   await writeJSON(path.join(DATA, 'posts.json'), posts);
   await writeJSON(path.join(DATA, 'places.json'), placeData);
 
-  const noGeo = posts.filter((p) => !p.place);
+  const moved = placeData.posts || {};
+  const noGeo = posts.filter((p) => !p.place && !moved[p.id]?.place);
   const lines = [`# Instagram export import`, '', `Run: ${new Date().toISOString()}`, '',
     `- ${posts.length} posts with photos`, `- ${posts.length - noGeo.length} on the map in ${clusters.length} places`,
     `- ${noGeo.length} without a location (set one in src/data/places.json under "posts")`, `- ${videos} videos/reels skipped`,
