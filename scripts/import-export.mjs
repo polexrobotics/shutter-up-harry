@@ -109,8 +109,7 @@ async function main() {
   }
 
   // Name each place after the biggest city near its centre.
-  const byKey = {};
-  for (const c of clusters) {
+  const nameFor = (c) => {
     let pick = null, score = -1;
     for (const [name, lat, lng, pop, cc] of cities.cities) {
       if (Math.abs(lat - c.lat) > 1 || Math.abs(lng - c.lng) > 1.5) continue;
@@ -122,6 +121,24 @@ async function main() {
       let bd = Infinity;
       for (const [name, lat, lng, , cc] of cities.cities) { const d = km(c, { lat, lng }); if (d < bd) { bd = d; pick = { name, cc, d }; } }
     }
+    return pick;
+  };
+  // Clusters that end up named after the same town and sit close together become one place.
+  for (let i = 0; i < clusters.length; i++) {
+    const a = clusters[i]; a.pick ||= nameFor(a);
+    for (let j = i + 1; j < clusters.length; j++) {
+      const b = clusters[j]; b.pick ||= nameFor(b);
+      if (b.pick.name !== a.pick.name || b.pick.cc !== a.pick.cc || km(a, b) > 120) continue;
+      const n = a.posts.length + b.posts.length;
+      a.lat = (a.lat * a.posts.length + b.lat * b.posts.length) / n;
+      a.lng = (a.lng * a.posts.length + b.lng * b.posts.length) / n;
+      a.posts.push(...b.posts); clusters.splice(j--, 1);
+      a.pick = nameFor(a);
+    }
+  }
+  const byKey = {};
+  for (const c of clusters) {
+    const pick = c.pick;
     const country = cities.countries[pick.cc] || pick.cc;
     let key = slugify(`${pick.name}`);
     if (byKey[key] && byKey[key] !== c) key = slugify(`${pick.name}-${pick.cc}`);

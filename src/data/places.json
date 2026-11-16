@@ -204,38 +204,13 @@
       "lng": 22.8088,
       "tags": [
         "Europe"
-      ]
-    },
-    "argos-gr": {
-      "name": "Near Árgos, Greece",
-      "lat": 37.2093,
-      "lng": 23.0026,
-      "tags": [
-        "Europe"
       ],
       "title": "Around Árgos"
-    },
-    "sparta-gr": {
-      "name": "Near Sparta, Greece",
-      "lat": 36.7509,
-      "lng": 22.3879,
-      "tags": [
-        "Europe"
-      ],
-      "title": "Around Sparta"
     },
     "kalamata": {
       "name": "Kalamata, Greece",
       "lat": 37.0411,
       "lng": 22.114,
-      "tags": [
-        "Europe"
-      ]
-    },
-    "kalamata-gr": {
-      "name": "Near Kalamata, Greece",
-      "lat": 37.0353,
-      "lng": 21.6411,
       "tags": [
         "Europe"
       ],
@@ -264,7 +239,8 @@
       "lng": 20.9004,
       "tags": [
         "Europe"
-      ]
+      ],
+      "title": "Around Préveza"
     },
     "mestre": {
       "name": "Mestre, Italy",
@@ -374,6 +350,123 @@
       "tags": [
         "Europe"
       ]
+    },
+    "hong-kong": {
+      "name": "Hong Kong, Hong Kong",
+      "lat": 22.286,
+      "lng": 114.1636,
+      "tags": [
+        "Asia"
+      ]
+    },
+    "houston": {
+      "name": "Houston, United States",
+      "lat": 29.8227,
+      "lng": -95.3928,
+      "tags": [
+        "North America"
+      ]
+    },
+    "adelaide": {
+      "name": "Adelaide, Australia",
+      "lat": -34.8792,
+      "lng": 138.6791,
+      "tags": [
+        "Australia & NZ"
+      ]
+    },
+    "vancouver": {
+      "name": "Vancouver, Canada",
+      "lat": 49.2755,
+      "lng": -123.122,
+      "tags": [
+        "North America"
+      ]
+    },
+    "providence": {
+      "name": "Providence, United States",
+      "lat": 41.8288,
+      "lng": -71.4649,
+      "tags": [
+        "North America"
+      ]
+    },
+    "korinthos": {
+      "name": "Kórinthos, Greece",
+      "lat": 37.9168,
+      "lng": 23.0032,
+      "tags": [
+        "Europe"
+      ]
+    },
+    "como": {
+      "name": "Near Como, Italy",
+      "lat": 45.9282,
+      "lng": 9.2029,
+      "tags": [
+        "Europe"
+      ],
+      "title": "Around Como"
+    },
+    "san-jose": {
+      "name": "San José, Costa Rica",
+      "lat": 9.9182,
+      "lng": -84.0444,
+      "tags": [
+        "North America"
+      ]
+    },
+    "enterprise": {
+      "name": "Near Enterprise, United States",
+      "lat": 35.6063,
+      "lng": -115.3912,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Enterprise"
+    },
+    "south-lake-tahoe": {
+      "name": "Near South Lake Tahoe, United States",
+      "lat": 37.9836,
+      "lng": -119.068,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around South Lake Tahoe"
+    },
+    "sanger": {
+      "name": "Near Sanger, United States",
+      "lat": 37.5078,
+      "lng": -118.573,
+      "tags": [
+        "North America"
+      ],
+      "title": "Around Sanger"
+    },
+    "nadi": {
+      "name": "Nadi, Fiji",
+      "lat": -17.7614,
+      "lng": 177.4652,
+      "tags": [
+        "Australia & NZ"
+      ]
+    },
+    "boise": {
+      "name": "Boise, United States",
+      "lat": 43.6158,
+      "lng": -116.2024,
+      "tags": [
+        "North America"
+      ]
+    },
+    "geelong": {
+      "name": "Near Geelong, Australia",
+      "lat": -38.3299,
+      "lng": 144.3181,
+      "tags": [
+        "Australia & NZ"
+      ],
+      "title": "Around Geelong"
     }
   },
   "posts": {}

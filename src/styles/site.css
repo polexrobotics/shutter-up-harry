@@ -62,11 +62,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .pin:hover,.pin.active{transform:scale(1.12)}
 .pin.active{border-color:var(--accent)}
 .pin-n{position:absolute;right:-2px;bottom:-2px}
-.pinwrap{position:relative;width:52px;height:52px}
+.pinwrap{width:52px;height:52px}
 .pinwrap .n{position:absolute;right:-6px;top:-6px;background:var(--ink);color:var(--surface);font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 6px;font-family:var(--f-mono)}
 .pinwrap.new::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);animation:pulse 2.4s ease-out infinite}
 @keyframes pulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.5);opacity:0}}
-.cl{position:relative;width:64px;height:64px}
+.cl{width:64px;height:64px}
 .cl .pin{width:64px;height:64px}
 .cl .pin::after{content:"";position:absolute;inset:0;background:rgba(10,15,20,.38)}
 .cl b{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-family:var(--f-display);font-size:22px;z-index:2;text-shadow:0 1px 4px rgba(0,0,0,.5)}
@@ -92,7 +92,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tag{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);border-radius:6px;padding:4px 8px}
 .grid{columns:2;column-gap:8px;padding:20px 22px 0}
 .grid button{display:block;width:100%;border:0;padding:0;margin:0 0 8px;background:var(--surface-2);border-radius:6px;overflow:hidden;break-inside:avoid;position:relative}
-.grid img{width:100%;display:block}
+.grid img{width:100%;height:auto;display:block}
 .grid button:hover img{filter:brightness(1.06)}
 .grid .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;font-size:11.5px;color:#fff;text-align:left;background:linear-gradient(transparent,rgba(0,0,0,.55));opacity:0;transition:opacity .2s}
 .grid button:hover .cap,.grid button:focus-visible .cap{opacity:1}
@@ -114,7 +114,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* lightbox */
 .lb{position:absolute;inset:0;z-index:800;background:#0b0f12;color:#eef2f4;display:grid;grid-template-columns:1fr 380px}
 .lb-stage{position:relative;display:grid;place-items:center;min-width:0;min-height:0;padding:56px 64px}
-.lb-stage img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.lb-stage img{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .lb .iconbtn{background:rgba(255,255,255,.1)}
 .lb .x{top:calc(env(safe-area-inset-top,0px) + 14px);left:max(14px, env(safe-area-inset-left,0px))}
 .lb .prev{left:max(14px, env(safe-area-inset-left,0px));top:50%}
@@ -201,7 +201,8 @@ button{font:inherit;color:inherit;cursor:pointer}
   .strip button[aria-current="true"]{border-color:var(--accent)}
   .strip img{width:92px;height:68px;object-fit:cover;border-radius:9px}
   .strip b{display:block;font-family:var(--f-display);font-size:16px;line-height:1.15;font-weight:700}
-  .strip span{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+  .strip span{display:block;color:var(--muted);font-size:12.5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .strip button>div{min-width:0}
   .app-series-open .strip,.app-series-open .strip-label{display:none}
 
   .panel{top:auto;left:0;right:0;bottom:0;width:100%;height:calc(100% - env(safe-area-inset-top,0px) - 58px);border-radius:18px 18px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1)}
@@ -247,3 +248,5 @@ a{color:inherit}
 .panel .insta:hover{color:var(--ink)}
 .card{text-decoration:none;color:inherit}
 .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* MapLibre positions markers absolutely; keep it that way. */
+.maplibregl-marker.pinwrap,.maplibregl-marker.cl{position:absolute}

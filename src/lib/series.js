@@ -1,6 +1,7 @@
 // Turns imported posts + Harry's place settings into the series shown on the map.
 import posts from '../data/posts.json';
 import placeData from '../data/places.json';
+import site from '../site.config.js';
 
 const strip = (caption = '') =>
   caption.replace(/📍[^\n]*/gu, '').replace(/^\s*(?:location|place)\s*[:\-–][^\n]*/gimu, '')
@@ -33,7 +34,8 @@ export function getSeries() {
       w: img.w, h: img.h,
       caption: firstLine(strip(p.caption)) || place.name,
       date: p.timestamp,
-      permalink: p.permalink,
+      // The data export has no post links, so fall back to Harry's profile.
+      permalink: p.permalink || site.instagram,
     })));
     const first = list.at(-1).timestamp, last = list[0].timestamp;
     const span = monthYear(first) === monthYear(last) ? monthYear(last) : `${monthYear(first)} – ${monthYear(last)}`;

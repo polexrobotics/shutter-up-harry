@@ -25,22 +25,6 @@ const FALLBACK_STYLE = {
   ],
 };
 
-function geojson() {
-  const list = visible();
-  return {
-    type: 'FeatureCollection',
-    features: list.map((s, i) => ({ type: 'Feature', properties: { slug: s.slug, rank: list.length - i }, geometry: { type: 'Point', coordinates: [s.lng, s.lat] } })),
-  };
-}
-
-function addPlaces() {
-  if (map.getSource('places')) return;
-  map.addSource('places', { type: 'geojson', data: geojson(), cluster: true, clusterRadius: 56, clusterMaxZoom: 11,
-    clusterProperties: { top: ['max', ['get', 'rank']] } });
-  // An invisible layer, so the source is rendered and can be queried for the photo markers.
-  map.addLayer({ id: 'places-hit', type: 'circle', source: 'places', paint: { 'circle-radius': 1, 'circle-opacity': 0 } });
-}
-
 function initMap() {
   const list = visible();
   const bounds = list.reduce((b, s) => b.extend([s.lng, s.lat]), new maplibregl.LngLatBounds([list[0].lng, list[0].lat], [list[0].lng, list[0].lat]));
@@ -55,9 +39,9 @@ function initMap() {
   const timer = setTimeout(fallback, 8000);
   map.on('error', (e) => { if (!loaded && !map.isStyleLoaded()) { clearTimeout(timer); fallback(); } });
   map.once('load', () => { if (loaded) return; loaded = true; clearTimeout(timer); ready(); });
-  map.on('render', () => { if (map.getSource('places') && map.isSourceLoaded('places')) updateMarkers(); });
+  map.on('move', updateMarkers);
 }
-function ready() { addPlaces(); updateMarkers(); route(); }
+function ready() { updateMarkers(); route(); }
 
 // HTML markers that follow the clustered source: a photo pin per place, a numbered stack per cluster.
 const markers = new Map();
@@ -71,33 +55,40 @@ function pinEl(s) {
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(e); });
   return el;
 }
-function clusterEl(id, count, top) {
-  const list = visible(); const s = list[list.length - top] || list[0];
+function clusterEl(group) {
   const el = document.createElement('div');
   el.className = 'cl';
-  el.innerHTML = `<div class="stack"></div><div class="pin"><img alt="" src="${s.cover.thumb}"></div><b>${count}</b>`;
-  el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `${count} places, zoom in`);
-  const zoom = async (e) => {
+  el.innerHTML = `<div class="stack"></div><div class="pin"><img alt="" src="${group[0].cover.thumb}"></div><b>${group.length}</b>`;
+  el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', `${group.length} places, zoom in`);
+  const zoom = (e) => {
     e.stopPropagation();
-    const f = map.querySourceFeatures('places').find((x) => x.properties.cluster_id === id);
-    const z = await map.getSource('places').getClusterExpansionZoom(id);
-    map.easeTo({ center: f ? f.geometry.coordinates : map.getCenter(), zoom: z + 0.3, duration: 600 });
+    const b = group.reduce((bb, s) => bb.extend([s.lng, s.lat]), new maplibregl.LngLatBounds());
+    map.fitBounds(b, { padding: 90, maxZoom: map.getZoom() + 4, duration: 700 });
   };
   el.addEventListener('click', zoom);
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter') zoom(e); });
   return el;
 }
+// Places that would overlap on screen are grouped into one numbered stack (newest place on top).
+const CLUSTER_PX = 56;
 function updateMarkers() {
+  if (!map) return;
+  const groups = [];
+  for (const s of visible()) { // already newest first
+    const pt = map.project([s.lng, s.lat]);
+    const g = groups.find((g) => Math.hypot(g.x - pt.x, g.y - pt.y) < CLUSTER_PX);
+    if (g) g.list.push(s); else groups.push({ x: pt.x, y: pt.y, list: [s] });
+  }
   const seen = new Set();
-  for (const f of map.querySourceFeatures('places')) {
-    const p = f.properties;
-    const key = p.cluster ? `c${p.cluster_id}` : p.slug;
-    if (seen.has(key)) continue;
+  for (const g of groups) {
+    const one = g.list.length === 1;
+    const key = one ? g.list[0].slug : 'c:' + g.list.map((s) => s.slug).join('|');
     seen.add(key);
+    const lngLat = one ? [g.list[0].lng, g.list[0].lat] : map.unproject([g.x, g.y]);
     if (!markers.has(key)) {
-      const el = p.cluster ? clusterEl(p.cluster_id, p.point_count, p.top) : pinEl(SERIES.find((s) => s.slug === p.slug));
-      markers.set(key, new maplibregl.Marker({ element: el }).setLngLat(f.geometry.coordinates).addTo(map));
-    }
+      const el = one ? pinEl(g.list[0]) : clusterEl(g.list);
+      markers.set(key, new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map));
+    } else if (!one) markers.get(key).setLngLat(lngLat);
   }
   for (const [key, m] of markers) if (!seen.has(key)) { m.remove(); markers.delete(key); }
   if (current) markActive(current.slug);
@@ -122,7 +113,7 @@ $('#chips').addEventListener('click', (e) => {
   const b = e.target.closest('[data-c]'); if (!b) return;
   filter = b.dataset.c;
   document.querySelectorAll('#chips .chip').forEach((c) => c.setAttribute('aria-pressed', c === b));
-  map.getSource('places')?.setData(geojson());
+  updateMarkers();
   markers.forEach((m) => m.remove()); markers.clear();
   const n = visible().length;
   $('#introTitle').textContent = filter === 'All' ? `Photographs from ${SERIES.length} places` : `${n} ${filter.toLowerCase()} ${n === 1 ? 'place' : 'places'}`;
@@ -207,7 +198,7 @@ let stripTimer, stripCur = null;
 function renderStrip() {
   const v = visible();
   $('#stripLabel').textContent = `${v.length} places · swipe or tap a pin`;
-  $('#strip').innerHTML = v.map((s) => `<button data-id="${s.slug}"><img alt="" src="${s.cover.thumb}"><div><b>${esc(s.title)}</b><span>${esc(s.place)}</span><span>${esc(s.dates)} · ${s.photos.length} photos</span></div></button>`).join('');
+  $('#strip').innerHTML = v.map((s) => `<button data-id="${s.slug}"><img alt="" src="${s.cover.thumb}"><div><b>${esc(s.title)}</b><span>${esc(s.place)}</span><span>${s.photos.length} photos · ${esc(s.dates)}</span></div></button>`).join('');
   stripCur = null;
 }
 $('#strip').addEventListener('click', (e) => { const b = e.target.closest('[data-id]'); if (b) location.hash = b.dataset.id; });
