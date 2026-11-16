@@ -1,0 +1,72 @@
+---
+// Works on any static host: with no form service set, the form opens the visitor's email app with the message filled in.
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getSeries } from '../lib/series.js';
+import site from '../site.config.js';
+const series = getSeries();
+const side = series.find((s) => s.cover.h > s.cover.w) || series[0];
+const c = site.contact;
+---
+<Base title="Contact" description={`Contact ${site.name}: ${c.intro}`} bodyClass="page">
+  <SiteHeader current="contact" />
+  <main class="section contact">
+    <div class="contact-copy">
+      <p class="eyebrow">Contact</p>
+      <h1>Say hello</h1>
+      <p class="lead">{c.intro}</p>
+      <ul class="contact-ways">
+        <li><span>Email</span><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        <li><span>Instagram</span><a href={site.instagram} rel="noopener" target="_blank">{site.handle}</a></li>
+        <li><span>Based in</span>{site.location}</li>
+      </ul>
+      <p class="note">{c.printNote}</p>
+      {side && <img class="contact-img" src={side.cover.src} alt={side.cover.caption} loading="lazy" width={side.cover.w} height={side.cover.h} />}
+    </div>
+
+    <form class="contact-form" id="contactForm" method="post" action={site.formEndpoint || undefined} data-email={site.email} data-endpoint={site.formEndpoint}>
+      <div class="field"><label for="cf-name">Your name</label><input id="cf-name" name="name" autocomplete="name" required /></div>
+      <div class="field"><label for="cf-email">Email</label><input id="cf-email" name="email" type="email" autocomplete="email" required /></div>
+      <fieldset class="field">
+        <legend>What’s it about?</legend>
+        <div class="topics">
+          {c.topics.map((t, i) => <label class="topic"><input type="radio" name="topic" value={t} checked={i === 0} /><span>{t}</span></label>)}
+        </div>
+      </fieldset>
+      <div class="field"><label for="cf-photo">Photo or place <small>(optional)</small></label>
+        <input id="cf-photo" name="photo" list="cf-places" placeholder="e.g. Flinders Street Station" />
+        <datalist id="cf-places">{series.map((s) => <option value={s.title} />)}</datalist>
+      </div>
+      <div class="field"><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" rows="6" required></textarea></div>
+      <button class="btn btn-primary" type="submit">Send message</button>
+      <p class="form-status" id="formStatus" role="status"></p>
+    </form>
+  </main>
+  <SiteFooter />
+</Base>
+<script>
+  const f = document.getElementById('contactForm') as HTMLFormElement;
+  const status = document.getElementById('formStatus')!;
+  // Pre-fill from links like /contact/?topic=Print%20enquiry&photo=Rome
+  const q = new URLSearchParams(location.search);
+  const topic = q.get('topic'); if (topic) f.querySelectorAll<HTMLInputElement>('input[name=topic]').forEach((r) => { r.checked = r.value === topic; });
+  if (q.get('photo')) (f.elements.namedItem('photo') as HTMLInputElement).value = q.get('photo')!;
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const d = new FormData(f);
+    if (f.dataset.endpoint) {
+      status.textContent = 'Sending…';
+      try {
+        const r = await fetch(f.dataset.endpoint, { method: 'POST', body: d, headers: { Accept: 'application/json' } });
+        if (!r.ok) throw new Error();
+        f.reset(); status.textContent = 'Thanks, your message is on its way.';
+      } catch { status.textContent = `That didn’t send. Please email ${f.dataset.email} instead.`; }
+      return;
+    }
+    const subject = `${d.get('topic')}${d.get('photo') ? `: ${d.get('photo')}` : ''}`;
+    const body = `${d.get('message')}\n\n${d.get('name')}\n${d.get('email')}`;
+    location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    status.textContent = 'Your email app should open with the message ready to send.';
+  });
+</script>

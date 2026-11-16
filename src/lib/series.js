@@ -58,3 +58,19 @@ export function getSeries() {
 }
 
 export const allTags = (series) => [...new Set(series.flatMap((s) => s.tags))].sort();
+
+// Numbers for the landing and about pages.
+export function getStats(series) {
+  const photos = series.reduce((n, s) => n + s.photos.length, 0);
+  const STATES = { California: 'United States', Nevada: 'United States', Idaho: 'United States' };
+  const countries = new Set(series.filter((s) => s.place.includes(',')).map((s) => { const c = s.place.split(',').pop().trim(); return STATES[c] || c; }));
+  const first = series.flatMap((s) => s.photos.map((p) => p.date)).sort()[0];
+  return { places: series.length, photos, countries: countries.size, since: first ? new Date(first).getFullYear() : null };
+}
+
+// Banner photos: Harry's pick, else the cover of each of the busiest places that's wider than tall.
+export function heroPhotos(series, slugs = [], n = 5) {
+  const picked = slugs.length ? slugs.map((k) => series.find((s) => s.slug === k)).filter(Boolean)
+    : [...series].sort((a, b) => b.photos.length - a.photos.length).filter((s) => s.cover.w >= s.cover.h * 1.15);
+  return picked.slice(0, n).map((s) => ({ ...s.cover, place: s.title, slug: s.slug }));
+}

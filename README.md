@@ -88,3 +88,9 @@ Instagram tokens expire after 60 days; the same workflow refreshes it every Mond
 - Print shop (sizes, prices in AUD, Stripe checkout). Prints are by email enquiry for now.
 - About / contact page and Harry's own branding.
 - Full-resolution originals for prints (Instagram copies are about 1080 px wide: fine on screen, too small for large prints).
+
+## Pages and where to edit them
+
+- `/` landing page with the photo banner, `/map/` the map, `/places/` every place, `/about/`, `/contact/`.
+- All the words on the landing, About and Contact pages live in `src/site.config.js` (name, email, bio paragraphs, contact topics). Pick the banner photos with `heroPlaces`.
+- The contact form opens the visitor's email app with the message filled in. To receive messages without that step, sign up for a form service (Formspree, Netlify Forms…) and put its URL in `formEndpoint`.

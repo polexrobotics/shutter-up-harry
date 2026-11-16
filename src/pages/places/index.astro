@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { getSeries, getStats } from '../../lib/series.js';
+const series = getSeries();
+const stats = getStats(series);
+---
+<Base title="Places" description={`${stats.photos} photographs from ${stats.places} places in ${stats.countries} countries.`} image={series[0]?.cover.src} bodyClass="page">
+  <SiteHeader current="places" />
+  <main class="section">
+    <div class="section-head">
+      <div><p class="eyebrow">{stats.photos.toLocaleString('en-AU')} photographs · {stats.countries} countries</p><h1>All {stats.places} places</h1></div>
+      <a class="more" href="/map/">See them on the map →</a>
+    </div>
+    <div class="place-cards">
+      {series.map((s) => (
+        <a class="place-card" href={`/places/${s.slug}/`}>
+          <img src={s.cover.thumb} alt="" loading="lazy" width={s.cover.w} height={s.cover.h} />
+          <div><b>{s.title}</b><span>{s.place} · {s.photos.length} photos</span></div>
+        </a>
+      ))}
+    </div>
+  </main>
+  <SiteFooter />
+</Base>

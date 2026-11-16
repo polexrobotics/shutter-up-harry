@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getSeries, getStats } from '../lib/series.js';
+import site from '../site.config.js';
+const series = getSeries();
+const stats = getStats(series);
+const byCount = [...series].sort((a, b) => b.photos.length - a.photos.length);
+const banner = byCount.find((s) => s.cover.w > s.cover.h * 1.2)?.cover;
+const favourites = byCount.slice(0, 8);
+const gallery = byCount.slice(0, 6).map((s) => s.photos[Math.min(3, s.photos.length - 1)]);
+---
+<Base title="About" description={`${site.about.intro} ${stats.photos} photographs from ${stats.places} places.`} image={banner?.src} bodyClass="page">
+  <SiteHeader current="about" />
+  <main>
+    <section class="page-banner">
+      {banner && <img src={banner.src} alt={banner.caption} width={banner.w} height={banner.h} />}
+      <div class="page-banner-copy">
+        <p class="eyebrow">About</p>
+        <h1>{site.about.title}</h1>
+      </div>
+    </section>
+
+    <section class="section about">
+      <div class="about-text">
+        <p class="lead">{site.about.intro}</p>
+        {site.about.paragraphs.map((p) => <p>{p}</p>)}
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="/contact/">Get in touch</a>
+          <a class="btn btn-outline" href={site.instagram} rel="noopener" target="_blank">Follow {site.handle}</a>
+        </div>
+      </div>
+      <aside class="about-facts" aria-label="At a glance">
+        <dl>
+          <div><dt>Based in</dt><dd>{site.location}</dd></div>
+          <div><dt>Photographs</dt><dd>{stats.photos.toLocaleString('en-AU')}</dd></div>
+          <div><dt>Places</dt><dd>{stats.places} in {stats.countries} countries</dd></div>
+          {stats.since && <div><dt>Shooting since</dt><dd>{stats.since}</dd></div>}
+          <div><dt>Prints</dt><dd>Made and signed by {site.name}</dd></div>
+        </dl>
+        <h3>Most photographed</h3>
+        <ul class="fav-list">
+          {favourites.map((s) => <li><a href={`/map/#${s.slug}`}>{s.title}</a><span>{s.photos.length}</span></li>)}
+        </ul>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">Selected work</p><h2>A few favourites</h2></div><a class="more" href="/map/">See them all on the map →</a></div>
+      <div class="about-gallery">
+        {gallery.map((ph) => <img src={ph.src} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} />)}
+      </div>
+    </section>
+  </main>
+  <SiteFooter />
+</Base>

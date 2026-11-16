@@ -223,7 +223,7 @@ let lb = { s: null, i: 0 }, lbInfo = false;
 function openLightbox(s, i) { lb = { s, i }; lbInfo = false; renderLB(); $('#lb').hidden = false; $('#lb .x').focus(); }
 function renderLB() {
   const { s, i } = lb, ph = s.photos[i];
-  const enquire = `mailto:${site.email}?subject=${encodeURIComponent(`Print enquiry: ${ph.caption}`)}&body=${encodeURIComponent(`Hi ${site.name},\n\nI'd like to ask about a print of "${ph.caption}" (${s.place}).\n${location.origin}/places/${s.slug}/\n`)}`;
+  const enquire = `/contact/?topic=${encodeURIComponent('Print enquiry')}&photo=${encodeURIComponent(`${ph.caption} (${s.title})`)}`;
   $('#lb').innerHTML = `<div class="lb-stage"><img alt="${esc(ph.caption)}" src="${ph.src}" width="${ph.w}" height="${ph.h}">
      <button class="iconbtn x" aria-label="Close photo">✕</button>
      <button class="iconbtn prev" aria-label="Previous photo">‹</button><button class="iconbtn next" aria-label="Next photo">›</button></div>

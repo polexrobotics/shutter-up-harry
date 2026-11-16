@@ -1,0 +1,17 @@
+---
+import site from '../site.config.js';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="sf-inner">
+    <div>
+      <b class="sf-name">{site.name}</b>
+      <p>{site.tagline}. Based in {site.location}.</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="/map/">Map</a><a href="/places/">Places</a><a href="/about/">About</a><a href="/contact/">Contact</a>
+      <a href={site.instagram} rel="noopener" target="_blank">Instagram ↗</a>
+    </nav>
+  </div>
+  <p class="sf-small">© {year} {site.name}. All photographs are copyright and may not be used without permission.</p>
+</footer>

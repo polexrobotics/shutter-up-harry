@@ -3,6 +3,8 @@
 import Base from '../../layouts/Base.astro';
 import { getSeries } from '../../lib/series.js';
 import site from '../../site.config.js';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
 export function getStaticPaths() {
   const all = getSeries();
   return all.map((s) => ({ params: { slug: s.slug }, props: { s, all } }));
@@ -13,8 +15,9 @@ const idx = all.findIndex((x) => x.slug === s.slug);
 const next = all[(idx + 1) % all.length];
 ---
 <Base title={s.title} description={`${s.title}: ${s.photos.length} photographs from ${s.place} by ${site.name}.`} image={s.cover.src}>
+  <SiteHeader current="places" />
   <main class="place-page">
-    <nav class="pp-nav"><a href="/" class="brand"><b>{site.name}</b><span>{site.tagline}</span></a><a class="pillbtn" href={`/#${s.slug}`}>See it on the map</a></nav>
+    <nav class="pp-nav"><a href="/places/">← All places</a><a class="pillbtn" href={`/map/#${s.slug}`}>See it on the map</a></nav>
     <header class="pp-head">
       <img class="pp-cover" src={s.cover.src} alt={s.cover.caption} width={s.cover.w} height={s.cover.h} />
       <div class="pp-title">
@@ -33,15 +36,16 @@ const next = all[(idx + 1) % all.length];
       ))}
     </section>
     <footer class="pp-foot">
-      <a href={`mailto:${site.email}?subject=${encodeURIComponent(`Print enquiry: ${s.title}`)}`}>Ask {site.name} about a print</a>
+      <a href={`/contact/?topic=${encodeURIComponent('Print enquiry')}&photo=${encodeURIComponent(s.title)}`}>Ask {site.name} about a print</a>
       <a href={`/places/${next.slug}/`}>Next place: {next.title} →</a>
     </footer>
   </main>
+  <SiteFooter />
 </Base>
 <style>
-  .place-page{max-width:1100px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px, env(safe-area-inset-right,0px)) 48px max(16px, env(safe-area-inset-left,0px));background:var(--surface);min-height:100vh}
+  .place-page{max-width:1100px;margin:0 auto;padding:24px max(16px, env(safe-area-inset-right,0px)) 48px max(16px, env(safe-area-inset-left,0px));background:var(--surface);min-height:100vh}
   .pp-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
-  .pp-nav .brand{text-decoration:none;color:inherit}
+  .pp-nav>a:first-child{color:var(--muted);text-decoration:none;font-size:14px}
   .pillbtn{text-decoration:none}
   .pp-head{display:grid;gap:24px}
   .pp-cover{width:100%;border-radius:12px;aspect-ratio:3/2;object-fit:cover;height:auto}

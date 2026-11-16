@@ -1,42 +1,99 @@
 ---
+// Landing page: photo banner, the numbers, latest places, prints, a little about Harry.
 import Base from '../layouts/Base.astro';
-import { getSeries, allTags } from '../lib/series.js';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getSeries, getStats, heroPhotos } from '../lib/series.js';
 import site from '../site.config.js';
 const series = getSeries();
-const tags = ['All', ...allTags(series)];
-const data = { series, site: { name: site.name, instagram: site.instagram, email: site.email, mapStyle: site.mapStyle } };
+const stats = getStats(series);
+const hero = heroPhotos(series, site.heroPlaces);
+const latest = series.slice(0, 6);
+const mosaic = [...series].sort((a, b) => b.photos.length - a.photos.length).slice(0, 8);
+const aboutPhoto = series.find((s) => /melbourne/i.test(s.slug))?.cover || series[0]?.cover;
+const SLIDE = 6; // seconds per banner photo
+// Cross-fade timing for however many banner photos there are.
+const share = 100 / Math.max(hero.length, 1), fade = Math.min(4, share / 4);
+const heroCss = hero.length > 1 ? `@keyframes heroFade{0%{opacity:0}${fade}%{opacity:1}${share}%{opacity:1}${share + fade}%{opacity:0}100%{opacity:0}}` : '';
 ---
-<Base bodyClass="map-page" image={series[0]?.cover.src}>
-  <div id="app">
-    <div id="map" role="application" aria-label="Map of photo series"></div>
-    <header class="topbar">
-      <a class="brand" href="/" style="text-decoration:none;color:inherit"><b>{site.name}</b><span>{site.tagline}</span></a>
-      <div class="chips" id="chips" role="group" aria-label="Filter places">
-        {tags.map((t) => <button class="chip" aria-pressed={t === 'All' ? 'true' : 'false'} data-c={t}>{t}</button>)}
+<Base image={hero[0]?.src} bodyClass="page">
+  <style is:inline set:html={heroCss}></style>
+  <SiteHeader overlay />
+  <main>
+    <section class="hero" style={`--n:${hero.length};--slide:${SLIDE}s`} aria-label="Featured photographs">
+      <div class="hero-slides">
+        {hero.map((ph, i) => (
+          <figure class="hero-slide" style={`--i:${i}`}>
+            <img src={ph.src} alt={ph.caption} width={ph.w} height={ph.h} fetchpriority={i === 0 ? 'high' : 'low'} loading={i === 0 ? 'eager' : 'lazy'} />
+            <figcaption><a href={`/map/#${ph.slug}`}>{ph.place}</a></figcaption>
+          </figure>
+        ))}
       </div>
-      <button class="pillbtn" id="listBtn" aria-pressed="false">List</button>
-    </header>
-    <aside class="intro" id="intro">
-      <h1 id="introTitle">Photographs from {series.length} places</h1>
-      <p>Pick a place on the map to see the photos from it. New posts on Instagram appear here automatically.</p>
-    </aside>
-    <div class="strip-label" id="stripLabel">{series.length} places · swipe or tap a pin</div>
-    <div class="strip" id="strip" aria-label="Places"></div>
-    <!-- The list is real HTML so it works without JavaScript and for search engines. -->
-    <section class="list" id="list" hidden>
-      <h2 class="visually-hidden">All places</h2>
-      <div class="list-grid" id="listGrid">
-        {series.map((s) => (
-          <a class="card" href={`/places/${s.slug}/`} data-id={s.slug} data-tags={s.tags.join('|')}>
-            <img alt="" src={s.cover.thumb} loading="lazy" width={s.cover.w} height={s.cover.h} />
-            <div><b>{s.title}</b><span>{s.place} · {s.dates} · {s.photos.length} photos</span></div>
+      <div class="hero-copy">
+        <p class="eyebrow">{site.handle} · {site.location}</p>
+        <h1>{site.tagline}</h1>
+        <p class="hero-line">{site.heroLine}</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="/map/">Explore the map</a>
+          <a class="btn btn-ghost" href="/contact/">Ask about a print</a>
+        </div>
+      </div>
+      <a class="hero-scroll" href="#numbers" aria-label="Scroll down">↓</a>
+    </section>
+
+    <section class="numbers" id="numbers" aria-label="At a glance">
+      <div><b>{stats.photos.toLocaleString('en-AU')}</b><span>photographs</span></div>
+      <div><b>{stats.places}</b><span>places</span></div>
+      <div><b>{stats.countries}</b><span>countries</span></div>
+      {stats.since && <div><b>{stats.since}</b><span>shooting since</span></div>}
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">Latest</p><h2>Recent places</h2></div>
+        <a class="more" href="/places/">All {stats.places} places →</a>
+      </div>
+      <div class="place-cards">
+        {latest.map((s) => (
+          <a class="place-card" href={`/map/#${s.slug}`}>
+            <img src={s.cover.src} alt="" loading="lazy" width={s.cover.w} height={s.cover.h} />
+            <div><b>{s.title}</b><span>{s.dates} · {s.photos.length} photos</span></div>
           </a>
         ))}
       </div>
     </section>
-    <aside class="panel" id="panel" aria-label="Series" aria-hidden="true"></aside>
-    <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Photo"></div>
-  </div>
-  <script type="application/json" id="series-data" set:html={JSON.stringify(data)}></script>
-  <script>import '../scripts/map-app.js';</script>
+
+    <section class="section map-band">
+      <div class="map-band-copy">
+        <p class="eyebrow">The map</p>
+        <h2>Every photo, pinned where it was taken</h2>
+        <p>From New York rooftops to the Greek islands and back to Melbourne. Zoom in, pick a place and flick through the photos from it.</p>
+        <a class="btn btn-primary" href="/map/">Open the map</a>
+      </div>
+      <a class="mosaic" href="/map/" aria-label="Open the map">
+        {mosaic.map((s) => <img src={s.cover.thumb} alt="" loading="lazy" width={s.cover.w} height={s.cover.h} />)}
+      </a>
+    </section>
+
+    <section class="section split">
+      {aboutPhoto && <img class="split-img" src={aboutPhoto.src} alt={aboutPhoto.caption} loading="lazy" width={aboutPhoto.w} height={aboutPhoto.h} />}
+      <div>
+        <p class="eyebrow">About</p>
+        <h2>{site.about.title}</h2>
+        <p class="lead">{site.about.intro}</p>
+        <p>{site.about.paragraphs[0]}</p>
+        <a class="more" href="/about/">More about {site.name} →</a>
+      </div>
+    </section>
+
+    <section class="section prints">
+      <div>
+        <p class="eyebrow">Prints</p>
+        <h2>Like one enough to hang it?</h2>
+        <p>{site.contact.printNote} Tell {site.name} which photo you have in mind and he’ll come back with sizes and prices.</p>
+      </div>
+      <a class="btn btn-primary" href="/contact/?topic=Print%20enquiry">Ask about a print</a>
+    </section>
+  </main>
+  <SiteFooter />
 </Base>
