@@ -1,18 +1,18 @@
 /* Shared header/footer and the content pages (landing, about, contact, places). */
 :root{--hdr:64px;--wrap:1200px}
 body.page{background:var(--surface)}
-html.no-scroll,html.no-scroll body{overflow:hidden}
+html.no-scroll{overflow:hidden}
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
 h1,h2,h3{font-family:var(--f-display);letter-spacing:-.015em;text-wrap:balance}
 .lead{font-size:clamp(18px,2.2vw,21px);line-height:1.5}
 
 /* ---------- header ---------- */
 .site-header{position:sticky;top:0;z-index:900;height:var(--hdr);box-sizing:border-box;display:flex;align-items:center;gap:20px;
-  padding:env(safe-area-inset-top,0px) var(--gxr) 0 var(--gx);background:color-mix(in srgb,var(--surface) 92%,transparent);
+  padding:env(safe-area-inset-top,0px) var(--gxr) 0 var(--gx);background:var(--surface);
   backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);color:var(--ink)}
 .site-header.overlay{position:fixed;left:0;right:0;background:transparent;border-color:transparent;color:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;transition:background .25s,color .25s,border-color .25s}
 .site-header.overlay::before{content:"";position:absolute;inset:0 0 -40px;background:linear-gradient(rgba(0,0,0,.45),transparent);pointer-events:none;z-index:-1;transition:opacity .25s}
-.site-header.overlay.scrolled{background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--ink);border-color:var(--line);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px)}
+.site-header.overlay.scrolled{background:var(--surface);color:var(--ink);border-color:var(--line);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px)}
 .site-header.overlay.scrolled::before{opacity:0}
 .sh-brand{display:flex;flex-direction:column;line-height:1;margin-right:auto;text-decoration:none;color:inherit}
 .sh-brand b{font-family:var(--f-display);font-weight:700;font-size:24px;letter-spacing:-.01em}
@@ -193,4 +193,9 @@ body.map-page .lb{position:fixed;z-index:1000}
   .place-cards{grid-template-columns:1fr 1fr;gap:14px 12px}
   .place-card b{font-size:16px}
   .place-card span{font-size:12.5px}
+}
+/* Open phone menu: fully opaque. (A backdrop blur on the header would also trap the fixed menu inside the bar.) */
+@media (max-width:760px){
+  .site-header.menu-open,.site-header.overlay.menu-open{background:var(--surface);color:var(--ink);border-color:var(--line);backdrop-filter:none;-webkit-backdrop-filter:none}
+  .site-header.menu-open .sh-nav{background:var(--surface);height:calc(100dvh - var(--hdr));overflow-y:auto}
 }

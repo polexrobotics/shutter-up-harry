@@ -65,7 +65,7 @@ export function getStats(series) {
   const STATES = { California: 'United States', Nevada: 'United States', Idaho: 'United States' };
   const countries = new Set(series.filter((s) => s.place.includes(',')).map((s) => { const c = s.place.split(',').pop().trim(); return STATES[c] || c; }));
   const first = series.flatMap((s) => s.photos.map((p) => p.date)).sort()[0];
-  return { places: series.length, photos, countries: countries.size, since: first ? new Date(first).getFullYear() : null };
+  return { places: series.length, photos, countries: countries.size, since: site.shootingSince || (first ? new Date(first).getFullYear() : null) };
 }
 
 // Banner photos: Harry's pick, else the cover of each of the busiest places that's wider than tall.

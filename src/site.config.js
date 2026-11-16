@@ -6,6 +6,7 @@ export default {
   instagram: 'https://www.instagram.com/shutter.up.harry/',    // Harry's profile link
   email: 'hello@example.com',                   // where print enquiries and contact messages go
   location: 'Melbourne, Australia',
+  shootingSince: 2010,                          // shown as "shooting since" on the landing and About pages
   // Optional: a form service URL (Formspree, Netlify Forms, Basin...). Leave empty to send messages by email.
   formEndpoint: '',
   // Map style. OpenFreeMap is free and needs no account. Swap for MapTiler/Stadia if you prefer.
