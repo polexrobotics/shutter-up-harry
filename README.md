@@ -70,14 +70,17 @@ The app can stay in development mode: it only ever reads Harry's own account, so
 
 ## Put it online
 
-1. Push this folder to a GitHub repository.
-2. Connect the repo to **Netlify**, **Vercel** or **Cloudflare Pages** (all free for this). Build command `npm run build`, output folder `dist`.
-3. In the GitHub repo, go to **Settings → Secrets and variables → Actions** and add:
-   - `IG_ACCESS_TOKEN`: the Instagram token
-   - `GH_SECRETS_TOKEN`: a fine-grained GitHub token with *Secrets: read and write* on this repo (lets the weekly job save the refreshed Instagram token)
-4. The **Instagram sync** workflow (`.github/workflows/instagram-sync.yml`) then runs every morning at about 5–6 am Melbourne time. It commits new posts, the host redeploys, and the map is up to date. Use *Actions → Instagram sync → Run workflow* for an instant refresh after posting.
+The site is live at **https://shutterupharry.com.au**, hosted free on GitHub Pages.
 
-Instagram tokens expire after 60 days; the same workflow refreshes it every Monday.
+- `.github/workflows/deploy.yml` builds and publishes the site on every push to `main` (and after the Instagram sync). Use *Actions → Deploy site → Run workflow* to redeploy by hand.
+- Repo settings: **Settings → Pages**, Source *GitHub Actions*, Custom domain `shutterupharry.com.au`, *Enforce HTTPS* ticked.
+- DNS (managed at Crazy Domains): four `A` records on the bare domain to `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`, and a `CNAME` for `www` to `polexrobotics.github.io`. `www.shutterupharry.com.au` redirects to the bare domain.
+
+### Instagram sync (optional, not set up)
+
+The **Instagram sync** workflow (`.github/workflows/instagram-sync.yml`) runs by hand only. To use it, add these under **Settings → Secrets and variables → Actions**:
+- `IG_ACCESS_TOKEN`: the Instagram token
+- `GH_SECRETS_TOKEN`: a fine-grained GitHub token with *Secrets: read and write* on this repo
 
 ## Settings
 
