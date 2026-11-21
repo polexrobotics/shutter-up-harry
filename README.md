@@ -52,6 +52,10 @@ The sync script reads the `📍` line (or a `Location: ...` line), looks the pla
 
 The sync never overwrites these edits. New places it finds are added with `"check": true` so they're easy to review.
 
+### Photo numbers
+
+Every photo has a permanent number (`"no"` on each image in `src/data/posts.json`), shown on the site as **#123** on photo thumbnails, in the photo viewer and in print requests. Numbers were first given oldest to newest (#1 is the oldest post). Each import or sync keeps existing numbers and gives new photos the next numbers, so a number always points at the same photo. Numbers of removed photos are never reused.
+
 ## Connect Instagram (one-off, about 20 minutes)
 
 1. **Make Harry's account a professional account** (free): Instagram app → Settings → Account type and tools → Switch to professional account → Creator. Personal accounts can't use the API. No Facebook Page is needed.

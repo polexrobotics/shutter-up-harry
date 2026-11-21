@@ -41,7 +41,7 @@ const c = site.contact;
         <button type="button" id="pickedRemove" aria-label="Remove attached photo">✕</button>
       </div>
       <div class="field"><label for="cf-photo">Photo or place <small>(optional)</small></label>
-        <input id="cf-photo" name="photo" list="cf-places" placeholder="e.g. Flinders Street Station" />
+        <input id="cf-photo" name="photo" list="cf-places" placeholder="e.g. #988 or Flinders Street Station" />
         <datalist id="cf-places">{series.map((s) => <option value={s.title} />)}</datalist>
       </div>
       <div class="field"><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" rows="6" required></textarea></div>

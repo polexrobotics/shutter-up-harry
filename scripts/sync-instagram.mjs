@@ -11,7 +11,7 @@
 // Harry's own edits in src/data/places.json (titles, stories, moved pins, hidden posts) are never overwritten.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, placeFromCaption, saveImage, exists } from './lib.mjs';
+import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, placeFromCaption, saveImage, exists, numberPhotos } from './lib.mjs';
 
 const TOKEN = process.env.IG_ACCESS_TOKEN;
 if (!TOKEN) {
@@ -63,7 +63,8 @@ async function main() {
   const places = await readJSON(placesFile, { places: {}, posts: {} });
   places.places ??= {}; places.posts ??= {};
   const cache = await readJSON(cacheFile, {});
-  const previous = Object.fromEntries((await readJSON(postsFile, [])).map((p) => [p.id, p]));
+  const previousList = await readJSON(postsFile, []);
+  const previous = Object.fromEntries(previousList.map((p) => [p.id, p]));
 
   console.log('Listing posts…');
   const media = await listMedia();
@@ -117,6 +118,7 @@ async function main() {
     });
   }
 
+  numberPhotos(posts, previousList); // permanent photo numbers (#123)
   await writeJSON(postsFile, posts);
   await writeJSON(placesFile, places);
   await writeJSON(cacheFile, cache);
