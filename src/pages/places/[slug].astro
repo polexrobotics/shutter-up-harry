@@ -13,6 +13,12 @@ const { s, all } = Astro.props;
 const fmt = (iso) => new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Melbourne' });
 const idx = all.findIndex((x) => x.slug === s.slug);
 const next = all[(idx + 1) % all.length];
+// Per-photo print request: carries the photo (and its Instagram post when known) through to the contact form.
+const printLink = (ph) => {
+  const q = new URLSearchParams({ topic: 'Print enquiry', photo: `${ph.caption} (${s.title})`, img: ph.src, place: s.slug });
+  if (ph.permalink && ph.permalink !== site.instagram) q.set('ig', ph.permalink);
+  return `/contact/?${q}`;
+};
 ---
 <Base title={s.title} description={`${s.title}: ${s.photos.length} photographs from ${s.place} by ${site.name}.`} image={s.cover.src}>
   <SiteHeader current="places" />
@@ -31,7 +37,7 @@ const next = all[(idx + 1) % all.length];
       {s.photos.map((ph) => (
         <figure>
           <a href={ph.src}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} /></a>
-          <figcaption>{ph.caption} <span class="mono">{fmt(ph.date)}</span> <a href={ph.permalink} rel="noopener">Instagram ↗</a></figcaption>
+          <figcaption>{ph.caption} <span class="mono">{fmt(ph.date)}</span> <a href={ph.permalink} rel="noopener">Instagram ↗</a> <a href={printLink(ph)}>Print ✉</a></figcaption>
         </figure>
       ))}
     </section>

@@ -4,11 +4,13 @@ export default {
   handle: '@shutter.up.harry',
   tagline: 'Photographs from the road',
   instagram: 'https://www.instagram.com/shutter.up.harry/',    // Harry's profile link
-  email: 'hello@example.com',                   // where print enquiries and contact messages go
+  email: 'harry.giannakoudakis@outlook.com.au', // where print enquiries and contact messages go
   location: 'Melbourne, Australia',
   shootingSince: 2010,                          // shown as "shooting since" on the landing and About pages
-  // Optional: a form service URL (Formspree, Netlify Forms, Basin...). Leave empty to send messages by email.
-  formEndpoint: '',
+  // Form service that emails every contact-form message to `email` (FormSubmit: free, no account).
+  // The very first message sends Harry an "Activate form" email; click it once and messages arrive from then on.
+  // Leave empty to have the form open the visitor's own email app instead.
+  formEndpoint: 'https://formsubmit.co/ajax/harry.giannakoudakis@outlook.com.au',
   // Map style. OpenFreeMap is free and needs no account. Swap for MapTiler/Stadia if you prefer.
   mapStyle: 'https://tiles.openfreemap.org/styles/positron',
 

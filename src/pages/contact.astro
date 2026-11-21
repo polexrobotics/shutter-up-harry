@@ -1,5 +1,6 @@
 ---
-// Works on any static host: with no form service set, the form opens the visitor's email app with the message filled in.
+// Works on any static host. Messages go to the form service in site.formEndpoint, which emails them to Harry.
+// With no service set, or if the service fails, the form opens the visitor's email app with the message filled in.
 import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -34,11 +35,17 @@ const c = site.contact;
           {c.topics.map((t, i) => <label class="topic"><input type="radio" name="topic" value={t} checked={i === 0} /><span>{t}</span></label>)}
         </div>
       </fieldset>
+      <div class="picked" id="picked" hidden>
+        <img id="pickedImg" alt="" />
+        <div><b>Photo attached</b><span>Harry will get a link to this exact photo.</span></div>
+        <button type="button" id="pickedRemove" aria-label="Remove attached photo">✕</button>
+      </div>
       <div class="field"><label for="cf-photo">Photo or place <small>(optional)</small></label>
         <input id="cf-photo" name="photo" list="cf-places" placeholder="e.g. Flinders Street Station" />
         <datalist id="cf-places">{series.map((s) => <option value={s.title} />)}</datalist>
       </div>
       <div class="field"><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" rows="6" required></textarea></div>
+      <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <button class="btn btn-primary" type="submit">Send message</button>
       <p class="form-status" id="formStatus" role="status"></p>
     </form>
@@ -52,21 +59,47 @@ const c = site.contact;
   const q = new URLSearchParams(location.search);
   const topic = q.get('topic'); if (topic) f.querySelectorAll<HTMLInputElement>('input[name=topic]').forEach((r) => { r.checked = r.value === topic; });
   if (q.get('photo')) (f.elements.namedItem('photo') as HTMLInputElement).value = q.get('photo')!;
+  // A print request from a photo carries the photo itself (img), its place (place) and, when known, its Instagram post (ig).
+  // Only accept the site's own photos and real Instagram links, so the link Harry receives can be trusted.
+  const img = /^\/media\/[\w.-]+$/.test(q.get('img') || '') ? q.get('img')! : '';
+  const place = /^[\w-]+$/.test(q.get('place') || '') ? q.get('place')! : '';
+  const ig = /^https:\/\/(www\.)?instagram\.com\//.test(q.get('ig') || '') ? q.get('ig')! : '';
+  let attached = img ? { photo: location.origin + img, map: place ? `${location.origin}/map/#${place}` : '', instagram: ig } : null;
+  const picked = document.getElementById('picked')!;
+  if (attached) { (document.getElementById('pickedImg') as HTMLImageElement).src = img; picked.hidden = false; }
+  document.getElementById('pickedRemove')!.onclick = () => { attached = null; picked.hidden = true; };
+  const openEmailApp = (d: FormData) => {
+    const subject = `${d.get('topic')}${d.get('photo') ? `: ${d.get('photo')}` : ''}`;
+    const links = attached ? `\n\nPhoto: ${attached.photo}${attached.instagram ? `\nInstagram: ${attached.instagram}` : ''}${attached.map ? `\nOn the map: ${attached.map}` : ''}` : '';
+    const body = `${d.get('message')}${links}\n\n${d.get('name')}\n${d.get('email')}`;
+    location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+  const btn = f.querySelector('button[type=submit]') as HTMLButtonElement;
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = new FormData(f);
     if (f.dataset.endpoint) {
-      status.textContent = 'Sending…';
+      status.textContent = 'Sending…'; btn.disabled = true;
+      const photo = d.get('photo');
+      const payload = {
+        name: d.get('name'), email: d.get('email'), topic: d.get('topic'), photo: photo || '-', message: d.get('message'),
+        ...(attached && { 'photo link': attached.photo, ...(attached.instagram && { instagram: attached.instagram }), ...(attached.map && { 'on the map': attached.map }) }),
+        _subject: `Website: ${d.get('topic')}${photo ? ` – ${photo}` : ''}`,
+        _template: 'table', _captcha: 'false', _honey: d.get('_honey'),
+      };
       try {
-        const r = await fetch(f.dataset.endpoint, { method: 'POST', body: d, headers: { Accept: 'application/json' } });
-        if (!r.ok) throw new Error();
-        f.reset(); status.textContent = 'Thanks, your message is on its way.';
-      } catch { status.textContent = `That didn’t send. Please email ${f.dataset.email} instead.`; }
+        const r = await fetch(f.dataset.endpoint, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json', Accept: 'application/json' } });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || String(j.success) === 'false') throw new Error(j.message);
+        f.reset(); attached = null; picked.hidden = true; status.textContent = 'Thanks, your message is on its way to Harry.';
+      } catch {
+        // Never lose a request: hand it to the visitor's email app instead.
+        status.textContent = 'That didn’t go through, so your email app should open with the message ready to send.';
+        openEmailApp(d);
+      } finally { btn.disabled = false; }
       return;
     }
-    const subject = `${d.get('topic')}${d.get('photo') ? `: ${d.get('photo')}` : ''}`;
-    const body = `${d.get('message')}\n\n${d.get('name')}\n${d.get('email')}`;
-    location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    openEmailApp(d);
     status.textContent = 'Your email app should open with the message ready to send.';
   });
 </script>
