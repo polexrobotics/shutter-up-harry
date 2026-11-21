@@ -58,3 +58,24 @@ export async function saveImage(buffer, base, { max = 1600, thumb = 480, quality
 }
 
 export const exists = (p) => fs.access(p).then(() => true, () => false);
+
+/**
+ * Give every photo a permanent number (image.no), shown on the site as #123.
+ * Photos keep the number they already had; new photos get the next numbers, oldest first.
+ * Numbers are never reused, even if a photo is later removed.
+ */
+export function numberPhotos(posts, previousPosts = []) {
+  const old = new Map();
+  let max = 0;
+  for (const p of previousPosts) for (const [i, img] of (p.images || []).entries()) {
+    if (Number.isInteger(img.no)) { old.set(`${p.id}-${i}`, img.no); max = Math.max(max, img.no); }
+  }
+  const taken = new Set();
+  const ordered = [...posts].sort((a, b) => (a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0));
+  for (const p of ordered) for (const [i, img] of p.images.entries()) {
+    const no = img.no ?? old.get(`${p.id}-${i}`);
+    if (Number.isInteger(no) && !taken.has(no)) { img.no = no; taken.add(no); max = Math.max(max, no); } else delete img.no;
+  }
+  for (const p of ordered) for (const img of p.images) if (img.no == null) img.no = ++max;
+  return posts;
+}

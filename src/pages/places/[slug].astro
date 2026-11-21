@@ -1,7 +1,7 @@
 ---
 // A plain, shareable page per place: good for search engines, link previews and people without JavaScript.
 import Base from '../../layouts/Base.astro';
-import { getSeries } from '../../lib/series.js';
+import { getSeries, photoLabel } from '../../lib/series.js';
 import site from '../../site.config.js';
 import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
@@ -15,7 +15,7 @@ const idx = all.findIndex((x) => x.slug === s.slug);
 const next = all[(idx + 1) % all.length];
 // Per-photo print request: carries the photo (and its Instagram post when known) through to the contact form.
 const printLink = (ph) => {
-  const q = new URLSearchParams({ topic: 'Print enquiry', photo: `${ph.caption} (${s.title})`, img: ph.src, place: s.slug });
+  const q = new URLSearchParams({ topic: 'Print enquiry', photo: photoLabel(ph, s.title), img: ph.src, place: s.slug });
   if (ph.permalink && ph.permalink !== site.instagram) q.set('ig', ph.permalink);
   return `/contact/?${q}`;
 };
@@ -36,7 +36,7 @@ const printLink = (ph) => {
     <section class="pp-grid">
       {s.photos.map((ph, i) => (
         <figure>
-          <a href={ph.src} data-pv={i} aria-label={`Open ${ph.caption}`}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} /></a>
+          <a href={ph.src} data-pv={i} aria-label={`Open ${ph.caption}`}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} />{ph.no && <span class="ph-no">#{ph.no}</span>}</a>
           <figcaption>{ph.caption} <span class="mono">{fmt(ph.date)}</span> <a href={ph.permalink} rel="noopener">Instagram ↗</a> <a href={printLink(ph)}>Print ✉</a></figcaption>
         </figure>
       ))}
@@ -60,7 +60,7 @@ const printLink = (ph) => {
         </div>
       </div>
     </div>
-    <script type="application/json" id="pv-data" set:html={JSON.stringify(s.photos.map((ph) => ({ src: ph.src, thumb: ph.thumb, w: ph.w, h: ph.h, id: ph.id, caption: ph.caption, date: fmt(ph.date), ig: ph.permalink, print: printLink(ph) })))}></script>
+    <script type="application/json" id="pv-data" set:html={JSON.stringify(s.photos.map((ph) => ({ src: ph.src, thumb: ph.thumb, w: ph.w, h: ph.h, id: ph.id, no: ph.no, caption: ph.caption, date: fmt(ph.date), ig: ph.permalink, print: printLink(ph) })))}></script>
     <footer class="pp-foot">
       <a href={`/contact/?topic=${encodeURIComponent('Print enquiry')}&photo=${encodeURIComponent(s.title)}`}>Ask {site.name} about a print</a>
       <a href={`/places/${next.slug}/`}>Next place: {next.title} →</a>
@@ -87,7 +87,8 @@ const printLink = (ph) => {
   .pp-foot a{color:var(--accent);font-weight:500}
   @media (min-width:900px){.pp-head{grid-template-columns:3fr 2fr;align-items:end}}
   @media (max-width:520px){.pp-grid{columns:2;column-gap:8px}figure{margin-bottom:10px}figcaption{font-size:12px;gap:4px 8px}}
-  figure a[data-pv]{display:block;cursor:zoom-in}
+  figure a[data-pv]{display:block;cursor:zoom-in;position:relative}
+  .ph-no{position:absolute;left:6px;top:6px;padding:2px 6px;border-radius:4px;background:rgba(11,15,18,.55);color:#fff;font:500 11px/1.4 var(--f-mono,ui-monospace,monospace);letter-spacing:.02em;pointer-events:none;backdrop-filter:blur(2px)}
 
   /* Photo viewer: full screen over the page, closes with Back, ✕, Esc or the phone's back gesture. */
   .pv{position:fixed;inset:0;z-index:1000;background:#0b0f12;color:#eef2f4;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overscroll-behavior:contain}
@@ -132,7 +133,7 @@ const printLink = (ph) => {
     const p = photos[idx];
     img.src = p.src; img.alt = p.caption; img.width = p.w; img.height = p.h;
     $('pvCap').textContent = p.caption;
-    $('pvMeta').textContent = p.date;
+    $('pvMeta').textContent = p.no ? `Photo #${p.no} · ${p.date}` : p.date;
     $('pvCount').textContent = `${idx + 1} / ${photos.length}`;
     ($('pvPrint') as HTMLAnchorElement).href = p.print;
     ($('pvIg') as HTMLAnchorElement).href = p.ig;

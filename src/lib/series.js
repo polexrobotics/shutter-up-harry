@@ -29,6 +29,7 @@ export function getSeries() {
     list.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
     const photos = list.flatMap((p) => p.images.map((img, i) => ({
       id: `${p.id}-${i}`,
+      no: img.no, // permanent photo number, shown as #123
       src: `/media/${img.file}`,
       thumb: `/media/${img.thumb}`,
       w: img.w, h: img.h,
@@ -56,6 +57,9 @@ export function getSeries() {
   }
   return series.sort((a, b) => (a.latest < b.latest ? 1 : -1));
 }
+
+// "#123 Flinders Street Station (Melbourne)": how a photo is named in print requests.
+export const photoLabel = (ph, place) => `${ph.no ? `#${ph.no} ` : ''}${ph.caption}${place ? ` (${place})` : ''}`;
 
 export const allTags = (series) => [...new Set(series.flatMap((s) => s.tags))].sort();
 

@@ -9,6 +9,7 @@ const day = (iso) => new Date(iso).toLocaleDateString('en-AU', { day: 'numeric',
 const isPhone = () => innerWidth <= 760;
 const canHover = matchMedia('(hover: hover)').matches;
 function dist(a, b) { const R = 6371, t = Math.PI / 180, dl = (b.lat - a.lat) * t, dn = (b.lng - a.lng) * t; const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }
+const num = (ph) => (ph.no ? `#${ph.no}` : '');
 const clearHash = () => history.replaceState(null, '', location.pathname + location.search);
 
 let map, current = null, filter = 'All';
@@ -143,7 +144,7 @@ function openSeries(slug) {
     <div class="ph ph-head"><div class="where"><span>${esc(s.place)}</span><span class="mono">${coord(s.lat, s.lng)}</span></div><h2>${esc(s.title)}</h2></div>
     <div class="ph ph-body">${s.story ? `<p class="story">${esc(s.story).replace(/\n/g, '<br>')}</p>` : ''}
       <div class="tags">${s.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}<span class="tag">${esc(s.dates)}</span><span class="tag">${s.photos.length} photos</span></div></div>
-    <div class="grid">${s.photos.map((ph, i) => `<button data-i="${i}" aria-label="Open ${esc(ph.caption)}"><img alt="" loading="lazy" src="${ph.thumb}" width="${ph.w}" height="${ph.h}"><span class="cap">${esc(ph.caption)}</span></button>`).join('')}</div>
+    <div class="grid">${s.photos.map((ph, i) => `<button data-i="${i}" aria-label="Open ${esc(ph.caption)}"><img alt="" loading="lazy" src="${ph.thumb}" width="${ph.w}" height="${ph.h}"><span class="cap">${esc(ph.caption)}</span>${ph.no ? `<span class="no">${num(ph)}</span>` : ''}</button>`).join('')}</div>
     <div class="nextrow">${nearest(s).map(({ x, d }) => `<button data-go="${x.slug}"><small>Nearby · ${Math.round(d).toLocaleString('en-AU')} km</small><b>${esc(x.title)}</b></button>`).join('')}</div>
     <a class="insta" href="/places/${s.slug}/">Page for this place (to share) →</a></div>`;
   p.classList.add('open'); p.setAttribute('aria-hidden', 'false'); $('#app').classList.add('app-series-open');
@@ -224,16 +225,16 @@ function openLightbox(s, i) { lb = { s, i }; lbInfo = false; renderLB(); $('#lb'
 function renderLB() {
   const { s, i } = lb, ph = s.photos[i];
   // The request carries the photo itself (and its Instagram post when we know it) so Harry sees exactly which one.
-  const q = new URLSearchParams({ topic: 'Print enquiry', photo: `${ph.caption} (${s.title})`, img: ph.src, place: s.slug });
+  const q = new URLSearchParams({ topic: 'Print enquiry', photo: `${ph.no ? `#${ph.no} ` : ''}${ph.caption} (${s.title})`, img: ph.src, place: s.slug });
   if (ph.permalink && ph.permalink !== site.instagram) q.set('ig', ph.permalink);
   const enquire = `/contact/?${q}`;
   $('#lb').innerHTML = `<div class="lb-stage"><img alt="${esc(ph.caption)}" src="${ph.src}" width="${ph.w}" height="${ph.h}">
      <button class="iconbtn x" aria-label="Close photo">✕</button>
      <button class="iconbtn prev" aria-label="Previous photo">‹</button><button class="iconbtn next" aria-label="Next photo">›</button></div>
-   <div class="lb-bar"><div><b>${esc(ph.caption)}</b><span>${i + 1} / ${s.photos.length} · ${day(ph.date)}</span></div><button class="primary" id="infoBtn">Details</button></div>
+   <div class="lb-bar"><div><b>${esc(ph.caption)}</b><span>${ph.no ? `${num(ph)} · ` : ''}${i + 1} / ${s.photos.length} · ${day(ph.date)}</span></div><button class="primary" id="infoBtn">Details</button></div>
    <div class="lb-side" aria-label="Photo details">
      <div class="sheet-head"><b>Details</b><button id="infoClose" aria-label="Back to photo">✕</button></div>
-     <div><h3>${esc(ph.caption)}</h3><div class="sub" style="margin-top:8px"><span>${esc(s.title)} · ${esc(s.place)}</span><span class="mono exif">${day(ph.date)}</span><span class="mono exif">${i + 1} / ${s.photos.length}</span><span class="mono hint">← → to browse · Esc to close</span></div></div>
+     <div><h3>${esc(ph.caption)}</h3><div class="sub" style="margin-top:8px"><span>${esc(s.title)} · ${esc(s.place)}</span>${ph.no ? `<span class="mono exif">Photo ${num(ph)}</span>` : ''}<span class="mono exif">${day(ph.date)}</span><span class="mono exif">${i + 1} / ${s.photos.length}</span><span class="mono hint">← → to browse · Esc to close</span></div></div>
      <div class="lb-links">
        <a class="primary-link" href="${enquire}">Ask about a print <span>✉</span></a>
        <a href="${ph.permalink}" target="_blank" rel="noopener">View on Instagram <span>↗</span></a>

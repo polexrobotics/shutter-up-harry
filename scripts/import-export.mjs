@@ -7,12 +7,13 @@
 //   1. reads your_instagram_activity/media/posts_*.json
 //   2. makes web-sized copies of each photo in public/media (HEIC included); re-runs skip done photos
 //   3. groups posts into places by distance (about 35 km), named after the biggest nearby city
-//   4. writes src/data/posts.json and merges src/data/places.json, keeping any edits Harry made
+//   4. gives each new photo the next permanent number (#123); existing photos keep theirs
+//   5. writes src/data/posts.json and merges src/data/places.json, keeping any edits Harry made
 // Reels (videos) are skipped for now.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import heicConvert from 'heic-convert';
-import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, cleanCaption, saveImage, exists } from './lib.mjs';
+import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, cleanCaption, saveImage, exists, numberPhotos } from './lib.mjs';
 
 const dir = process.argv[2];
 if (!dir) { console.error('Usage: npm run import -- <path to the unzipped Instagram export>'); process.exit(1); }
@@ -59,7 +60,8 @@ async function toImage(file) {
 async function main() {
   const cities = JSON.parse(await fs.readFile(path.join(ROOT, 'scripts/data/cities.json'), 'utf8'));
   const raw = await readPosts();
-  const previous = Object.fromEntries((await readJSON(path.join(DATA, 'posts.json'), [])).map((p) => [p.id, p]));
+  const previousList = await readJSON(path.join(DATA, 'posts.json'), []);
+  const previous = Object.fromEntries(previousList.map((p) => [p.id, p]));
   const placeData = await readJSON(path.join(DATA, 'places.json'), { places: {}, posts: {} });
   // Drop sample places (no real posts) but keep anything Harry edited.
   const isSample = (k) => Object.values(previous).some((p) => p.place === k && String(p.id).startsWith('sample'));
@@ -158,6 +160,7 @@ async function main() {
   const used = new Set([...posts.map((p) => p.place), ...Object.values(placeData.posts || {}).map((s) => s.place)].filter(Boolean));
   for (const k of Object.keys(placeData.places)) if (!used.has(k) && !placeData.places[k].keep) delete placeData.places[k];
 
+  numberPhotos(posts, previousList); // permanent photo numbers (#123)
   posts.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
   await writeJSON(path.join(DATA, 'posts.json'), posts);
   await writeJSON(path.join(DATA, 'places.json'), placeData);
