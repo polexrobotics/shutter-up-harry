@@ -34,13 +34,33 @@ const printLink = (ph) => {
       </div>
     </header>
     <section class="pp-grid">
-      {s.photos.map((ph) => (
+      {s.photos.map((ph, i) => (
         <figure>
-          <a href={ph.src}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} /></a>
+          <a href={ph.src} data-pv={i} aria-label={`Open ${ph.caption}`}><img src={ph.thumb} alt={ph.caption} loading="lazy" width={ph.w} height={ph.h} /></a>
           <figcaption>{ph.caption} <span class="mono">{fmt(ph.date)}</span> <a href={ph.permalink} rel="noopener">Instagram ↗</a> <a href={printLink(ph)}>Print ✉</a></figcaption>
         </figure>
       ))}
     </section>
+    <div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+      <div class="pv-top">
+        <button class="pv-back" type="button" data-close aria-label="Close photo and go back"><span aria-hidden="true">←</span> Back</button>
+        <span class="pv-count mono" id="pvCount"></span>
+        <button class="pv-x" type="button" data-close aria-label="Close photo">✕</button>
+      </div>
+      <div class="pv-stage" id="pvStage">
+        <img id="pvImg" alt="" />
+        <button class="pv-nav pv-prev" type="button" id="pvPrev" aria-label="Previous photo">‹</button>
+        <button class="pv-nav pv-next" type="button" id="pvNext" aria-label="Next photo">›</button>
+      </div>
+      <div class="pv-info">
+        <div class="pv-text"><b id="pvCap"></b><span id="pvMeta"></span></div>
+        <div class="pv-actions">
+          <a class="btn btn-primary" id="pvPrint" href="#">Request a print <span aria-hidden="true">✉</span></a>
+          <a class="btn pv-ig" id="pvIg" href={site.instagram} target="_blank" rel="noopener">Instagram <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </div>
+    <script type="application/json" id="pv-data" set:html={JSON.stringify(s.photos.map((ph) => ({ src: ph.src, thumb: ph.thumb, w: ph.w, h: ph.h, id: ph.id, caption: ph.caption, date: fmt(ph.date), ig: ph.permalink, print: printLink(ph) })))}></script>
     <footer class="pp-foot">
       <a href={`/contact/?topic=${encodeURIComponent('Print enquiry')}&photo=${encodeURIComponent(s.title)}`}>Ask {site.name} about a print</a>
       <a href={`/places/${next.slug}/`}>Next place: {next.title} →</a>
@@ -49,7 +69,7 @@ const printLink = (ph) => {
   <SiteFooter />
 </Base>
 <style>
-  .place-page{max-width:1100px;margin:0 auto;padding:24px max(16px, env(safe-area-inset-right,0px)) 48px max(16px, env(safe-area-inset-left,0px));background:var(--surface);min-height:100vh}
+  .place-page{max-width:var(--wrap);margin:0 auto;padding:24px var(--pgr) 48px var(--pg);background:var(--surface);min-height:100vh}
   .pp-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
   .pp-nav>a:first-child{color:var(--muted);text-decoration:none;font-size:14px}
   .pillbtn{text-decoration:none}
@@ -58,7 +78,7 @@ const printLink = (ph) => {
   .pp-title .where{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted)}
   .pp-title h1{font-family:var(--f-display);font-size:clamp(30px,5vw,48px);line-height:1.05;margin:8px 0 12px;letter-spacing:-.015em;text-wrap:balance}
   .story{line-height:1.6;max-width:62ch;margin:0}
-  .pp-grid{columns:3 260px;column-gap:12px;margin-top:32px}
+  .pp-grid{columns:4 260px;column-gap:12px;margin-top:32px}
   figure{margin:0 0 12px;break-inside:avoid}
   figure img{width:100%;height:auto;border-radius:6px;display:block}
   figcaption{font-size:13px;color:var(--muted);padding:6px 2px 0;display:flex;gap:8px;flex-wrap:wrap}
@@ -66,4 +86,109 @@ const printLink = (ph) => {
   .pp-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:32px;padding-top:20px}
   .pp-foot a{color:var(--accent);font-weight:500}
   @media (min-width:900px){.pp-head{grid-template-columns:3fr 2fr;align-items:end}}
+  @media (max-width:520px){.pp-grid{columns:2;column-gap:8px}figure{margin-bottom:10px}figcaption{font-size:12px;gap:4px 8px}}
+  figure a[data-pv]{display:block;cursor:zoom-in}
+
+  /* Photo viewer: full screen over the page, closes with Back, ✕, Esc or the phone's back gesture. */
+  .pv{position:fixed;inset:0;z-index:1000;background:#0b0f12;color:#eef2f4;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overscroll-behavior:contain}
+  .pv-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 10px) var(--pgr) 10px var(--pg)}
+  .pv-back,.pv-x{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;min-height:44px;font-size:15px;font-weight:500}
+  .pv-back{padding:0 18px 0 14px;display:flex;align-items:center;gap:8px}
+  .pv-x{width:44px;font-size:17px}
+  .pv-count{color:#9aa7ad;font-size:13px}
+  .pv-stage{position:relative;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden;padding:0 76px;touch-action:pan-y pinch-zoom}
+  .pv-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.6);transition:opacity .15s}
+  .pv-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:28px;line-height:1;display:grid;place-items:center}
+  .pv-nav:hover,.pv-back:hover,.pv-x:hover{background:rgba(255,255,255,.2)}
+  .pv-prev{left:max(12px, env(safe-area-inset-left,0px))}.pv-next{right:max(12px, env(safe-area-inset-right,0px))}
+  .pv-info{display:flex;align-items:center;justify-content:space-between;gap:16px 24px;flex-wrap:wrap;padding:14px var(--pgr) calc(env(safe-area-inset-bottom,0px) + 18px) var(--pg);max-width:var(--wrap);width:100%;box-sizing:border-box;margin:0 auto}
+  .pv-text{display:grid;gap:4px;min-width:0;flex:1 1 260px}
+  .pv-text b{font-family:var(--f-display);font-size:20px;line-height:1.2}
+  .pv-text span{color:#9aa7ad;font-size:13px}
+  .pv-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .pv .btn-primary{background:#9db2ff;color:#0b1020}
+  .pv-ig{color:#eef2f4;border-color:#3a464d}
+  .pv-ig:hover{border-color:#eef2f4}
+  .pv-back:focus-visible,.pv-x:focus-visible,.pv-nav:focus-visible,.pv .btn:focus-visible{outline:2px solid #9db2ff;outline-offset:2px}
+  @media (max-width:760px){
+    .pv-stage{padding:0}
+    .pv-stage img{border-radius:0;box-shadow:none}
+    .pv-nav{width:38px;height:38px;font-size:22px;background:rgba(0,0,0,.4)}
+    .pv-x{display:none}
+    .pv-text b{font-size:17px}
+    .pv-actions{width:100%;display:grid;grid-template-columns:1.4fr 1fr}
+  }
+  @media (hover:none) and (max-width:760px){.pv-nav{opacity:.8}}
 </style>
+<script>
+  // In-page photo viewer for the place grid. Without JavaScript the photo links still open the image itself.
+  const photos = JSON.parse(document.getElementById('pv-data')!.textContent || '[]');
+  const pv = document.getElementById('pv')!;
+  const img = document.getElementById('pvImg') as HTMLImageElement;
+  const $ = (id: string) => document.getElementById(id)!;
+  let idx = -1, opener: HTMLElement | null = null;
+  const show = (i: number) => {
+    idx = (i + photos.length) % photos.length;
+    const p = photos[idx];
+    img.src = p.src; img.alt = p.caption; img.width = p.w; img.height = p.h;
+    $('pvCap').textContent = p.caption;
+    $('pvMeta').textContent = p.date;
+    $('pvCount').textContent = `${idx + 1} / ${photos.length}`;
+    ($('pvPrint') as HTMLAnchorElement).href = p.print;
+    ($('pvIg') as HTMLAnchorElement).href = p.ig;
+    const one = photos.length < 2; $('pvPrev').hidden = one; $('pvNext').hidden = one;
+    // Warm the neighbours so browsing feels instant.
+    [1, -1].forEach((d) => { const n = photos[(idx + d + photos.length) % photos.length]; if (n) new Image().src = n.src; });
+  };
+  const hashFor = (i: number) => `#photo-${photos[i].id}`;
+  const open = (i: number, push = true) => {
+    show(i);
+    if (pv.hidden) { opener = document.activeElement as HTMLElement; pv.hidden = false; document.documentElement.classList.add('no-scroll'); }
+    if (push) history.pushState({ pv: true }, '', hashFor(idx));
+    (document.querySelector('.pv-back') as HTMLElement).focus();
+  };
+  const hide = () => { pv.hidden = true; idx = -1; document.documentElement.classList.remove('no-scroll'); opener?.focus(); };
+  // Closing goes "back", so the phone's back gesture and the Back button do the same thing.
+  const close = () => { if (history.state?.pv) history.back(); else { history.replaceState(null, '', location.pathname + location.search); hide(); } };
+  const step = (d: number) => { show(idx + d); history.replaceState(history.state, '', hashFor(idx)); };
+
+  document.querySelector('.pp-grid')!.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest('a[data-pv]') as HTMLElement | null;
+    if (!a || (e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey) return;
+    e.preventDefault(); open(+a.dataset.pv!);
+  });
+  pv.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+  $('pvPrev').onclick = () => step(-1);
+  $('pvNext').onclick = () => step(1);
+  // Tap the dark area around the photo to close.
+  $('pvStage').addEventListener('click', (e) => { if (e.target === e.currentTarget) close(); });
+  addEventListener('popstate', () => {
+    const m = location.hash.match(/^#photo-(.+)$/);
+    const i = m ? photos.findIndex((p: any) => p.id === decodeURIComponent(m[1])) : -1;
+    if (i >= 0) open(i, false); else if (!pv.hidden) hide();
+  });
+  addEventListener('keydown', (e) => {
+    if (pv.hidden) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'Tab') { // keep focus inside the viewer
+      const f = [...pv.querySelectorAll<HTMLElement>('button:not([hidden]),a[href]')].filter((el) => el.offsetParent);
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  // Swipe left/right to browse; swipe down to close.
+  let sx = 0, sy = 0, tracking = false;
+  $('pvStage').addEventListener('touchstart', (e) => { if (e.touches.length !== 1) { tracking = false; return; } tracking = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  $('pvStage').addEventListener('touchend', (e) => {
+    if (!tracking) return; tracking = false;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) close();
+  });
+  // A shared link straight to a photo opens it.
+  { const m = location.hash.match(/^#photo-(.+)$/); const i = m ? photos.findIndex((p: any) => p.id === decodeURIComponent(m[1])) : -1;
+    if (i >= 0) { history.replaceState(null, '', location.pathname + location.search); open(i); } }
+</script>
