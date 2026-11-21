@@ -1,5 +1,6 @@
 ---
-// Works on any static host: with no form service set, the form opens the visitor's email app with the message filled in.
+// Works on any static host. Messages go to the form service in site.formEndpoint, which emails them to Harry.
+// With no service set, or if the service fails, the form opens the visitor's email app with the message filled in.
 import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
@@ -39,6 +40,7 @@ const c = site.contact;
         <datalist id="cf-places">{series.map((s) => <option value={s.title} />)}</datalist>
       </div>
       <div class="field"><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" rows="6" required></textarea></div>
+      <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <button class="btn btn-primary" type="submit">Send message</button>
       <p class="form-status" id="formStatus" role="status"></p>
     </form>
@@ -52,21 +54,36 @@ const c = site.contact;
   const q = new URLSearchParams(location.search);
   const topic = q.get('topic'); if (topic) f.querySelectorAll<HTMLInputElement>('input[name=topic]').forEach((r) => { r.checked = r.value === topic; });
   if (q.get('photo')) (f.elements.namedItem('photo') as HTMLInputElement).value = q.get('photo')!;
+  const openEmailApp = (d: FormData) => {
+    const subject = `${d.get('topic')}${d.get('photo') ? `: ${d.get('photo')}` : ''}`;
+    const body = `${d.get('message')}\n\n${d.get('name')}\n${d.get('email')}`;
+    location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+  const btn = f.querySelector('button[type=submit]') as HTMLButtonElement;
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const d = new FormData(f);
     if (f.dataset.endpoint) {
-      status.textContent = 'Sending…';
+      status.textContent = 'Sending…'; btn.disabled = true;
+      const photo = d.get('photo');
+      const payload = {
+        name: d.get('name'), email: d.get('email'), topic: d.get('topic'), photo: photo || '-', message: d.get('message'),
+        _subject: `Website: ${d.get('topic')}${photo ? ` – ${photo}` : ''}`,
+        _template: 'table', _captcha: 'false', _honey: d.get('_honey'),
+      };
       try {
-        const r = await fetch(f.dataset.endpoint, { method: 'POST', body: d, headers: { Accept: 'application/json' } });
-        if (!r.ok) throw new Error();
-        f.reset(); status.textContent = 'Thanks, your message is on its way.';
-      } catch { status.textContent = `That didn’t send. Please email ${f.dataset.email} instead.`; }
+        const r = await fetch(f.dataset.endpoint, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'application/json', Accept: 'application/json' } });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || String(j.success) === 'false') throw new Error(j.message);
+        f.reset(); status.textContent = 'Thanks, your message is on its way to Harry.';
+      } catch {
+        // Never lose a request: hand it to the visitor's email app instead.
+        status.textContent = 'That didn’t go through, so your email app should open with the message ready to send.';
+        openEmailApp(d);
+      } finally { btn.disabled = false; }
       return;
     }
-    const subject = `${d.get('topic')}${d.get('photo') ? `: ${d.get('photo')}` : ''}`;
-    const body = `${d.get('message')}\n\n${d.get('name')}\n${d.get('email')}`;
-    location.href = `mailto:${f.dataset.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    openEmailApp(d);
     status.textContent = 'Your email app should open with the message ready to send.';
   });
 </script>

@@ -96,4 +96,4 @@ The **Instagram sync** workflow (`.github/workflows/instagram-sync.yml`) runs by
 
 - `/` landing page with the photo banner, `/map/` the map, `/places/` every place, `/about/`, `/contact/`.
 - All the words on the landing, About and Contact pages live in `src/site.config.js` (name, email, bio paragraphs, contact topics). Pick the banner photos with `heroPlaces`.
-- The contact form opens the visitor's email app with the message filled in. To receive messages without that step, sign up for a form service (Formspree, Netlify Forms…) and put its URL in `formEndpoint`.
+- Contact-form messages (including every "Ask about a print" from the map) are emailed to Harry through FormSubmit (`formEndpoint`, free, no account). One-time step: the first message sent from the live site triggers an "Activate form" email to Harry's inbox; he clicks it once. If the service is ever down, the form falls back to opening the visitor's email app. Clear `formEndpoint` to use only the email-app route.
