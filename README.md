@@ -56,6 +56,28 @@ The sync never overwrites these edits. New places it finds are added with `"chec
 
 Every photo has a permanent number (`"no"` on each image in `src/data/posts.json`), shown on the site as **#123** on photo thumbnails, in the photo viewer and in print requests. Numbers were first given oldest to newest (#1 is the oldest post). Each import or sync keeps existing numbers and gives new photos the next numbers, so a number always points at the same photo. Numbers of removed photos are never reused.
 
+## Adding photos from a phone (`/upload/`)
+
+Harry can add a new photo straight from his phone at **https://shutterupharry.com.au/upload/**. The page isn't linked from the site and is hidden from search engines.
+
+1. Choose one or more photos (several become one post you swipe through), write a caption and check the date.
+2. Show where it was taken: the photo's own GPS is used when the phone keeps it, or tap the map, search for a place, or tap *Use where I am now*.
+3. Pick the place: *Automatic* joins the nearest place already on the map (within 35 km) or makes a new one named after the nearest town; or choose *New place…* and name it, or pick any place from the list.
+4. Tap **Add to site**. About 3 minutes later it's live with the next photo number, and the page says so.
+
+How it works without a server: the page commits the photos and a `post.json` to `inbox/<id>/` using GitHub's API. The **Add photos** workflow (`.github/workflows/add-photos.yml`, running `npm run add-photos`) makes the web copies, gives each photo the next permanent number, pins it to its place, removes it from `inbox/`, and the **Deploy site** workflow publishes the site. Uploaded posts are marked `"source": "upload"`, so a later `npm run import` from an Instagram export keeps them. A submission that can't be added is moved to `inbox/failed/<id>/` with a `reason.txt`.
+
+### One-time setup: the upload key
+
+The page holds no secret. Each phone is connected once with an upload key, a GitHub token that can only change this repo, which is stored on that phone only.
+
+1. Signed in to GitHub as the repo owner, open **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token** (https://github.com/settings/personal-access-tokens/new).
+2. Name it `Harry upload page`, set an expiry (1 year is a good balance), **Repository access: Only select repositories → shutter-up-harry**, and under **Repository permissions** set **Contents: Read and write**. Leave everything else as it is.
+3. Generate it and send the `github_pat_…` value to Harry privately (not in a public place).
+4. Harry opens `/upload/` on his phone, pastes it into *Upload key* and taps *Connect*. Tip: *Share → Add to Home Screen* makes it feel like an app.
+
+If the phone is lost or the key leaks, delete the token on the same GitHub page and make a new one. When it expires the page says the key stopped working; make a new one the same way.
+
 ## Connect Instagram (one-off, about 20 minutes)
 
 1. **Make Harry's account a professional account** (free): Instagram app → Settings → Account type and tools → Switch to professional account → Creator. Personal accounts can't use the API. No Facebook Page is needed.

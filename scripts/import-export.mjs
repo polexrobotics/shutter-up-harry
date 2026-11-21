@@ -7,27 +7,20 @@
 //   1. reads your_instagram_activity/media/posts_*.json
 //   2. makes web-sized copies of each photo in public/media (HEIC included); re-runs skip done photos
 //   3. groups posts into places by distance (about 35 km), named after the biggest nearby city
-//   4. gives each new photo the next permanent number (#123); existing photos keep theirs
+//   4. keeps photos added with the upload page (/upload/) and gives each new photo the next permanent number (#123); existing photos keep theirs
 //   5. writes src/data/posts.json and merges src/data/places.json, keeping any edits Harry made
 // Reels (videos) are skipped for now.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import heicConvert from 'heic-convert';
-import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, cleanCaption, saveImage, exists, numberPhotos } from './lib.mjs';
+import { DATA, MEDIA, ROOT, readJSON, writeJSON, slugify, cleanCaption, saveImage, exists, numberPhotos, km, nearestCity, REGION, SIZES } from './lib.mjs';
 
 const dir = process.argv[2];
 if (!dir) { console.error('Usage: npm run import -- <path to the unzipped Instagram export>'); process.exit(1); }
 
 const CLUSTER_KM = 35;
-const SIZES = { max: 1280, thumb: 400, quality: 80 };
-const REGION = { OC: 'Australia & NZ', NA: 'North America', SA: 'South America', EU: 'Europe', AS: 'Asia', AF: 'Africa', AN: 'Antarctica' };
 const IMAGE = /\.(jpe?g|png|webp|heic|heif)$/i;
 
-function km(a, b) {
-  const R = 6371, t = Math.PI / 180, dl = (b.lat - a.lat) * t, dn = (b.lng - a.lng) * t;
-  const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dn / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
-}
 function geoOf(m) {
   const md = m.media_metadata || {};
   for (const k of ['photo_metadata', 'video_metadata']) {
@@ -110,21 +103,7 @@ async function main() {
     } else clusters.push({ lat: p.geo.lat, lng: p.geo.lng, posts: [p] });
   }
 
-  // Name each place after the biggest city near its centre.
-  const nameFor = (c) => {
-    let pick = null, score = -1;
-    for (const [name, lat, lng, pop, cc] of cities.cities) {
-      if (Math.abs(lat - c.lat) > 1 || Math.abs(lng - c.lng) > 1.5) continue;
-      const d = km(c, { lat, lng });
-      const s = d <= 40 ? pop / (1 + (d / 20) ** 2) : -1;
-      if (s > score) { score = s; pick = { name, cc, d }; }
-    }
-    if (!pick) { // nothing big nearby: nearest town of 15k+
-      let bd = Infinity;
-      for (const [name, lat, lng, , cc] of cities.cities) { const d = km(c, { lat, lng }); if (d < bd) { bd = d; pick = { name, cc, d }; } }
-    }
-    return pick;
-  };
+  const nameFor = (c) => nearestCity(cities, c);
   // Clusters that end up named after the same town and sit close together become one place.
   for (let i = 0; i < clusters.length; i++) {
     const a = clusters[i]; a.pick ||= nameFor(a);
@@ -156,6 +135,8 @@ async function main() {
     if (!old.title && pick.d > 15) placeData.places[key].title = `Around ${pick.name}`;
     for (const p of c.posts) p.place = key;
   }
+  // Photos Harry added with the upload page (/upload/) aren't in the export: keep them as they are.
+  posts.push(...previousList.filter((p) => p.source === 'upload'));
   // Places that no longer have any posts are removed unless Harry edited them by hand.
   const used = new Set([...posts.map((p) => p.place), ...Object.values(placeData.posts || {}).map((s) => s.place)].filter(Boolean));
   for (const k of Object.keys(placeData.places)) if (!used.has(k) && !placeData.places[k].keep) delete placeData.places[k];

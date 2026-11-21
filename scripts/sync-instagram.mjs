@@ -118,6 +118,8 @@ async function main() {
     });
   }
 
+  // Photos Harry added with the upload page (/upload/) aren't on Instagram's API list: keep them.
+  posts.push(...previousList.filter((p) => p.source === 'upload'));
   numberPhotos(posts, previousList); // permanent photo numbers (#123)
   await writeJSON(postsFile, posts);
   await writeJSON(placesFile, places);

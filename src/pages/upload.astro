@@ -1,0 +1,487 @@
+---
+// Harry's private page for adding new photos from his phone. Not linked anywhere and hidden from search.
+//
+// How it stays safe on a static site: the page holds no secret. The first time Harry opens it he pastes an
+// upload key (a GitHub fine-grained token that can only change this one repo), which is kept on his phone only.
+// Each photo is committed to inbox/ in the repo; the "Add photos" GitHub Action numbers it, pins it to the map
+// and publishes the site (see scripts/add-photos.mjs). Setup steps are in the README under "Adding photos".
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { getSeries } from '../lib/series.js';
+import posts from '../data/posts.json';
+import site from '../site.config.js';
+
+const places = getSeries().map((s) => ({ key: s.slug, title: s.title, name: s.place, lat: s.lat, lng: s.lng, n: s.photos.length }));
+const lastNo = Math.max(0, ...posts.flatMap((p) => p.images.map((i) => i.no || 0)));
+---
+<Base title="Add photos" noindex bodyClass="page upload-page">
+  <SiteHeader />
+  <main class="up" id="up" data-repo={site.repo} data-style={site.mapStyle} data-last={lastNo}>
+    <script type="application/json" id="upPlaces" set:html={JSON.stringify(places)} />
+
+    <!-- Step 1, once per phone: paste the upload key -->
+    <section class="up-card" id="connect" hidden>
+      <p class="eyebrow">Add photos</p>
+      <h1>Connect this phone</h1>
+      <p>Paste the upload key Dimitri gave you. It stays on this phone and is only ever sent to GitHub.</p>
+      <form id="connectForm" class="up-stack">
+        <div class="field"><label for="key">Upload key</label>
+          <input id="key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" required />
+        </div>
+        <button class="btn btn-primary" type="submit">Connect</button>
+        <p class="form-status" id="connectStatus" role="status"></p>
+      </form>
+    </section>
+
+    <!-- Step 2: the form -->
+    <form class="up-stack" id="postForm" hidden>
+      <header>
+        <p class="eyebrow">Add photos</p>
+        <h1>New photo</h1>
+      </header>
+
+      <div class="field">
+        <span class="label">Photos <small>(several make one post you can swipe through)</small></span>
+        <div class="up-thumbs" id="thumbs">
+          <label class="up-pick" id="pick">
+            <input id="files" type="file" accept="image/*" multiple />
+            <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Choose photos</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field"><label for="caption">Caption</label>
+        <textarea id="caption" rows="3" maxlength="2200" placeholder={'Flinders Street Station\n#melbourne'}></textarea>
+        <small class="hint">The first line is the photo’s title on the site. Hashtags are hidden.</small>
+      </div>
+
+      <div class="field"><label for="date">Date taken</label>
+        <input id="date" type="date" required />
+      </div>
+
+      <fieldset class="field">
+        <legend>Where was it taken?</legend>
+        <p class="up-where" id="whereText">Tap the map, search for a place or use where you are now.</p>
+        <div class="up-find">
+          <input id="search" type="search" placeholder="Search, e.g. Brighton Beach boxes" enterkeyhint="search" />
+          <button class="btn btn-outline" type="button" id="searchBtn">Find</button>
+        </div>
+        <div class="up-results" id="results" hidden></div>
+        <div class="up-map" id="upMap"></div>
+        <button class="btn btn-outline up-here" type="button" id="hereBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="3.5" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="1.8"/></svg>
+          Use where I am now
+        </button>
+      </fieldset>
+
+      <div class="field"><label for="place">Put it in</label>
+        <select id="place"></select>
+        <input id="newName" placeholder="New place name, e.g. Brighton Beach" maxlength="80" hidden />
+      </div>
+
+      <div class="up-submit">
+        <p class="up-number" id="numberNote"></p>
+        <button class="btn btn-primary" type="submit" id="send">Add to site</button>
+        <p class="form-status" id="sendStatus" role="status"></p>
+      </div>
+    </form>
+
+    <!-- Step 3: sent -->
+    <section class="up-card" id="done" hidden>
+      <p class="eyebrow">Sent</p>
+      <h1 id="doneTitle">On its way</h1>
+      <img id="doneImg" alt="" class="up-done-img" />
+      <p id="doneText">It’ll be on the site in about 3 minutes.</p>
+      <div class="up-row">
+        <a class="btn btn-outline" id="doneLink" href="/map/" hidden>See it on the map</a>
+        <button class="btn btn-primary" type="button" id="again">Add another</button>
+      </div>
+    </section>
+
+    <p class="up-foot" id="foot" hidden><button type="button" id="disconnect">Disconnect this phone</button></p>
+  </main>
+</Base>
+
+<style is:global>
+  .up{max-width:560px;margin:0 auto;padding:24px var(--pg) calc(40px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+  .up h1{font-size:clamp(30px,7vw,40px);margin:0 0 6px}
+  .up-stack{display:grid;gap:22px}
+  .up-card{display:grid;gap:12px}
+  .up-card p{margin:0;line-height:1.5}
+  .up .label{font-weight:600;font-size:14px}
+  .up .hint{color:var(--muted);font-size:13px}
+  .up select{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%;box-sizing:border-box}
+  .up #newName{margin-top:8px}
+  .up-thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .up-thumb,.up-pick{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface-2)}
+  .up-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .up-thumb button{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;cursor:pointer}
+  .up-thumb .gps{position:absolute;left:6px;bottom:6px;font:500 11px var(--f-mono);background:rgba(0,0,0,.6);color:#fff;border-radius:6px;padding:3px 6px}
+  .up-pick{display:grid;place-content:center;justify-items:center;gap:6px;border:1.5px dashed var(--border);cursor:pointer;color:var(--muted);font-size:13px;font-weight:600;text-align:center}
+  .up-pick input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .up-thumbs.empty{grid-template-columns:1fr}
+  .up-thumbs.empty .up-pick{aspect-ratio:auto;min-height:150px}
+  .up-where{margin:0;color:var(--muted);font-size:14px}
+  .up-where b{color:var(--ink)}
+  .up-find{display:flex;gap:8px}
+  .up-find input{flex:1;min-width:0}
+  .up-find .btn{min-height:44px;padding:0 16px}
+  .up-results{display:grid;gap:6px}
+  .up-results button{font:inherit;font-size:14px;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+  .up-map{height:240px;border-radius:12px;overflow:hidden;background:var(--sea);border:1px solid var(--line)}
+  .up-here{justify-self:start;min-height:42px;padding:0 16px;font-size:14px}
+  .up-number{margin:0 0 10px;font:500 13px var(--f-mono);color:var(--muted)}
+  .up-submit{position:sticky;bottom:0;background:var(--surface);padding:12px 0 calc(12px + env(safe-area-inset-bottom,0px));margin-bottom:-12px;border-top:1px solid var(--line)}
+  .up-submit .btn{width:100%}
+  .up-submit .form-status{margin-top:8px}
+  .up-done-img{width:100%;max-height:50vh;object-fit:cover;border-radius:14px}
+  .up-row{display:flex;flex-wrap:wrap;gap:10px}
+  .up-foot{margin-top:36px;text-align:center}
+  .up-foot button{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;text-decoration:underline;cursor:pointer}
+  .up-pin{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);box-sizing:border-box}
+  .up .form-status.err{color:#c0392b}
+</style>
+
+<script>
+  import maplibregl from 'maplibre-gl';
+  import 'maplibre-gl/dist/maplibre-gl.css';
+
+  type Place = { key: string; title: string; name: string; lat: number; lng: number; n: number };
+  type Photo = { file: File; url: string; gps?: { lat: number; lng: number } | null; date?: string | null };
+  type Pin = { lat: number; lng: number; how: string } | null;
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const root = $('up');
+  const REPO = root.dataset.repo!;
+  const LAST_NO = Number(root.dataset.last) || 0;
+  const PLACES: Place[] = JSON.parse($('upPlaces').textContent || '[]');
+  const NEAR_KM = 35; // keep in step with scripts/add-photos.mjs
+  const KEY_STORE = 'harry-upload-key';
+  const API = 'https://api.github.com';
+
+  // ---------- the upload key (kept on this phone only) ----------
+  let memKey = '';
+  const getKey = () => { try { return localStorage.getItem(KEY_STORE) || memKey; } catch { return memKey; } };
+  const setKey = (k: string) => { memKey = k; try { k ? localStorage.setItem(KEY_STORE, k) : localStorage.removeItem(KEY_STORE); } catch {} };
+
+  async function gh(path: string, init: RequestInit = {}) {
+    const r = await fetch(API + path, { ...init, headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${getKey()}`, 'X-GitHub-Api-Version': '2022-11-28', ...(init.body ? { 'Content-Type': 'application/json' } : {}) } });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const e: any = new Error(j.message || `GitHub said ${r.status}`); e.status = r.status; throw e; }
+    return j;
+  }
+
+  function show(view: 'connect' | 'form' | 'done') {
+    $('connect').hidden = view !== 'connect';
+    $('postForm').hidden = view !== 'form';
+    $('done').hidden = view !== 'done';
+    $('foot').hidden = view === 'connect';
+    if (view === 'form') setTimeout(() => map?.resize(), 0);
+    window.scrollTo(0, 0);
+  }
+
+  $('connectForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const st = $('connectStatus'); st.classList.remove('err');
+    const k = ($('key') as HTMLInputElement).value.trim();
+    st.textContent = 'Checking…';
+    setKey(k);
+    try {
+      const repo = await gh(`/repos/${REPO}`);
+      if (!repo.permissions?.push) throw new Error('This key can read the site but not add to it. Ask Dimitri for one with “Contents: Read and write”.');
+      ($('key') as HTMLInputElement).value = ''; st.textContent = '';
+      show('form'); initMap();
+    } catch (err: any) {
+      setKey('');
+      st.classList.add('err');
+      st.textContent = err.status === 401 ? 'That key didn’t work. Check it was pasted in full, or ask Dimitri for a new one.' : err.status === 404 ? 'That key can’t see the site’s repo. Ask Dimitri to give it access to it.' : err.message;
+    }
+  });
+  $('disconnect').onclick = () => { setKey(''); show('connect'); };
+
+  // ---------- reading the photo's own GPS and date (JPEG EXIF) ----------
+  async function readExif(file: File): Promise<{ gps: { lat: number; lng: number } | null; date: string | null }> {
+    const none = { gps: null, date: null };
+    try {
+      const v = new DataView(await file.slice(0, 256 * 1024).arrayBuffer());
+      if (v.getUint16(0) !== 0xffd8) return none;
+      let o = 2;
+      while (o + 4 < v.byteLength) {
+        const marker = v.getUint16(o), size = v.getUint16(o + 2);
+        if (marker === 0xffe1 && v.getUint32(o + 4) === 0x45786966) return parseTiff(v, o + 10);
+        if ((marker & 0xff00) !== 0xff00) break;
+        o += 2 + size;
+      }
+    } catch {}
+    return none;
+  }
+  function parseTiff(v: DataView, t: number) {
+    const le = v.getUint16(t) === 0x4949;
+    const u16 = (p: number) => v.getUint16(t + p, le), u32 = (p: number) => v.getUint32(t + p, le);
+    const ifd = (p: number) => { const m = new Map<number, { type: number; n: number; at: number }>(); const c = u16(p); for (let i = 0; i < c; i++) { const e = p + 2 + i * 12; m.set(u16(e), { type: u16(e + 2), n: u32(e + 4), at: e + 8 }); } return m; };
+    const ascii = (e: any) => { const p = e.n > 4 ? u32(e.at) : e.at; let s = ''; for (let i = 0; i < e.n - 1; i++) s += String.fromCharCode(v.getUint8(t + p + i)); return s; };
+    const rats = (e: any) => { const p = u32(e.at); return [0, 1, 2].map((i) => u32(p + i * 8) / (u32(p + i * 8 + 4) || 1)); };
+    const ifd0 = ifd(u32(4));
+    let date: string | null = null, gps: { lat: number; lng: number } | null = null;
+    const exifPtr = ifd0.get(0x8769);
+    if (exifPtr) { const ex = ifd(u32(exifPtr.at)); const d = ex.get(0x9003) || ex.get(0x9004); if (d) { const m = ascii(d).match(/^(\d{4}):(\d\d):(\d\d)/); if (m) date = `${m[1]}-${m[2]}-${m[3]}`; } }
+    const gpsPtr = ifd0.get(0x8825);
+    if (gpsPtr) {
+      const g = ifd(u32(gpsPtr.at));
+      const la = g.get(2), lo = g.get(4);
+      if (la && lo) {
+        const dms = (x: number[]) => x[0] + x[1] / 60 + x[2] / 3600;
+        const lat = dms(rats(la)) * (g.get(1) && ascii(g.get(1)) === 'S' ? -1 : 1);
+        const lng = dms(rats(lo)) * (g.get(3) && ascii(g.get(3)) === 'W' ? -1 : 1);
+        if ((lat || lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) gps = { lat, lng };
+      }
+    }
+    return { gps, date };
+  }
+
+  // ---------- photos ----------
+  let photos: Photo[] = [];
+  const thumbs = $('thumbs'), pick = $('pick');
+  function drawThumbs() {
+    thumbs.querySelectorAll('.up-thumb').forEach((el) => el.remove());
+    photos.forEach((p, i) => {
+      const d = document.createElement('div'); d.className = 'up-thumb';
+      d.innerHTML = `<img alt="Photo ${i + 1}"><button type="button" aria-label="Remove photo ${i + 1}">✕</button>${p.gps ? '<span class="gps">📍 GPS</span>' : ''}`;
+      d.querySelector('img')!.src = p.url;
+      d.querySelector('button')!.onclick = () => { URL.revokeObjectURL(p.url); photos.splice(i, 1); drawThumbs(); };
+      thumbs.insertBefore(d, pick);
+    });
+    thumbs.classList.toggle('empty', !photos.length);
+    pick.querySelector('span')!.textContent = photos.length ? 'Add more' : 'Choose photos';
+    pick.hidden = photos.length >= 10;
+    updateNumber();
+  }
+  $('files').addEventListener('change', async (e) => {
+    const input = e.target as HTMLInputElement;
+    const added = [...(input.files || [])].slice(0, 10 - photos.length);
+    input.value = '';
+    for (const file of added) {
+      const ex = await readExif(file);
+      photos.push({ file, url: URL.createObjectURL(file), ...ex });
+    }
+    drawThumbs();
+    const first = photos.find((p) => p.gps);
+    if (first?.gps && (!pin || pin.how !== 'map')) setPin({ ...first.gps, how: 'photo' });
+    const dated = photos.find((p) => p.date);
+    if (dated?.date) ($('date') as HTMLInputElement).value = dated.date;
+  });
+
+  // ---------- where: map, search, current location ----------
+  let map: maplibregl.Map | null = null, marker: maplibregl.Marker | null = null, pin: Pin = null;
+  function initMap() {
+    if (map) return;
+    const mel = PLACES.find((p) => p.key === 'melbourne') || { lat: -37.81, lng: 144.96 };
+    map = new maplibregl.Map({ container: 'upMap', style: root.dataset.style!, center: [mel.lng, mel.lat], zoom: 9, attributionControl: { compact: true } });
+    map.touchZoomRotate.disableRotation();
+    // If the hosted map style can't load, fall back to plain coastlines (as on the map page).
+    let loaded = false;
+    const fallback = () => {
+      if (loaded) return; loaded = true;
+      map!.setStyle({ version: 8, sources: { land: { type: 'geojson', data: '/fallback-land.json' } }, layers: [
+        { id: 'sea', type: 'background', paint: { 'background-color': '#d6dfe3' } },
+        { id: 'land', type: 'fill', source: 'land', paint: { 'fill-color': '#f5f5f2', 'fill-outline-color': '#c3ccd0' } }] });
+    };
+    const timer = setTimeout(fallback, 8000);
+    map.on('error', () => { if (!loaded && !map!.isStyleLoaded()) { clearTimeout(timer); fallback(); } });
+    map.once('load', () => { loaded = true; clearTimeout(timer); });
+    map.on('click', (e) => setPin({ lat: e.lngLat.lat, lng: e.lngLat.lng, how: 'map' }, false));
+    if (pin) setPin(pin);
+  }
+  function setPin(p: NonNullable<Pin>, fly = true) {
+    pin = p;
+    if (map) {
+      if (!marker) {
+        const el = document.createElement('div'); el.className = 'up-pin';
+        marker = new maplibregl.Marker({ element: el, draggable: true }).setLngLat([p.lng, p.lat]).addTo(map);
+        marker.on('dragend', () => { const ll = marker!.getLngLat(); setPin({ lat: ll.lat, lng: ll.lng, how: 'map' }, false); });
+      } else marker.setLngLat([p.lng, p.lat]);
+      if (fly) map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 13), duration: 600 });
+    }
+    const how = { photo: 'from the photo’s GPS', here: 'where you are now', search: 'from your search', map: 'where you tapped' }[p.how] || '';
+    $('whereText').innerHTML = `<b>Pinned ${how}.</b> Drag the pin or tap the map to move it.`;
+    fillPlaces();
+  }
+  $('hereBtn').onclick = () => {
+    if (!navigator.geolocation) return;
+    $('whereText').textContent = 'Finding you…';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setPin({ lat: pos.coords.latitude, lng: pos.coords.longitude, how: 'here' }),
+      () => { $('whereText').textContent = 'Couldn’t get your location. Allow location for this site, or tap the map instead.'; },
+      { enableHighAccuracy: true, timeout: 15000 });
+  };
+  async function search() {
+    const q = ($('search') as HTMLInputElement).value.trim();
+    const box = $('results');
+    if (!q) return;
+    box.hidden = false; box.textContent = 'Searching…';
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=${encodeURIComponent(q)}`, { headers: { 'Accept-Language': 'en' } });
+      const list = await r.json();
+      box.textContent = '';
+      if (!list.length) { box.textContent = 'Nothing found. Try adding the city, or tap the map.'; return; }
+      for (const it of list) {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = it.display_name;
+        b.onclick = () => { box.hidden = true; setPin({ lat: +it.lat, lng: +it.lon, how: 'search' }); if (($('place') as HTMLSelectElement).value === 'new' && !($('newName') as HTMLInputElement).value) ($('newName') as HTMLInputElement).value = it.name || ''; };
+        box.append(b);
+      }
+    } catch { box.textContent = 'Search isn’t working right now. Tap the map instead.'; }
+  }
+  $('searchBtn').onclick = search;
+  $('search').addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') { e.preventDefault(); search(); } });
+
+  // ---------- which place it goes in ----------
+  const km = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+    const t = Math.PI / 180, dl = (b.lat - a.lat) * t, dn = (b.lng - a.lng) * t;
+    const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dn / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(x));
+  };
+  const dist = (d: number) => (d < 10 ? `${d.toFixed(1)} km` : `${Math.round(d)} km`);
+  function fillPlaces() {
+    const sel = $('place') as HTMLSelectElement;
+    const keep = sel.value;
+    const sorted = pin ? PLACES.map((p) => ({ ...p, d: km(pin!, p) })).sort((a, b) => a.d - b.d) : [...PLACES].sort((a, b) => a.title.localeCompare(b.title)).map((p) => ({ ...p, d: NaN }));
+    const near = sorted[0] && sorted[0].d <= NEAR_KM ? sorted[0] : null;
+    const auto = !pin ? 'Automatic (drop a pin first)' : near ? `Automatic: ${near.title} (${dist(near.d)} away)` : 'Automatic: a new place named after the nearest town';
+    sel.innerHTML = '';
+    sel.add(new Option(auto, 'auto'));
+    sel.add(new Option('New place…', 'new'));
+    const group = document.createElement('optgroup'); group.label = pin ? 'Places on the map, nearest first' : 'Places on the map';
+    for (const p of sorted) group.append(new Option(`${p.title}${Number.isNaN(p.d) ? '' : ` · ${dist(p.d)}`}`, p.key));
+    sel.add(group);
+    sel.value = [...sel.options].some((o) => o.value === keep) ? keep : 'auto';
+    ($('newName') as HTMLInputElement).hidden = sel.value !== 'new';
+  }
+  $('place').addEventListener('change', () => { const n = $('newName') as HTMLInputElement; n.hidden = ($('place') as HTMLSelectElement).value !== 'new'; if (!n.hidden) n.focus(); });
+
+  function updateNumber() {
+    const n = photos.length;
+    $('numberNote').textContent = !n ? '' : n === 1 ? `This will be photo #${LAST_NO + 1}` : `These will be photos #${LAST_NO + 1}–#${LAST_NO + n}`;
+  }
+
+  // ---------- sending ----------
+  // Phone photos can be 10+ MB; the site shows them at most 1280 px, so send a 2048 px JPEG.
+  async function shrink(file: File): Promise<Blob> {
+    let bmp: ImageBitmap;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' } as any); }
+    catch { throw new Error(`Couldn’t read ${file.name}. Try a JPEG, or share it from the Photos app.`); }
+    const s = Math.min(1, 2048 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+    bmp.close?.();
+    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('Couldn’t prepare the photo.'))), 'image/jpeg', 0.9));
+  }
+  const toBase64 = (b: Blob) => new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
+  const b64utf8 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+
+  function newId() {
+    const d = new Date(), z = (n: number) => String(n).padStart(2, '0');
+    return `up-${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+
+  const sendStatus = $('sendStatus');
+  const say = (t: string, err = false) => { sendStatus.textContent = t; sendStatus.classList.toggle('err', err); };
+
+  $('postForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const sel = ($('place') as HTMLSelectElement).value;
+    const newName = ($('newName') as HTMLInputElement).value.trim();
+    if (!photos.length) return say('Choose at least one photo.', true);
+    if (!pin && (sel === 'auto' || sel === 'new')) return say('Show where it was taken: tap the map, search, or pick a place from the list.', true);
+    if (sel === 'new' && !newName) return say('Give the new place a name.', true);
+
+    const btn = $('send') as HTMLButtonElement; btn.disabled = true;
+    const id = newId();
+    try {
+      const blobs: string[] = [];
+      for (const [i, p] of photos.entries()) {
+        say(`Preparing photo ${i + 1} of ${photos.length}…`);
+        blobs.push(await toBase64(await shrink(p.file)));
+      }
+      const files = photos.map((_, i) => `${i}.jpg`);
+      const post = {
+        version: 1,
+        caption: ($('caption') as HTMLTextAreaElement).value.trim(),
+        date: new Date(`${($('date') as HTMLInputElement).value}T12:00:00`).toISOString(),
+        place: { ...(pin && { lat: +pin.lat.toFixed(5), lng: +pin.lng.toFixed(5) }), ...(sel === 'new' ? { name: newName } : sel !== 'auto' ? { key: sel } : {}) },
+        images: files,
+        sentAt: new Date().toISOString(),
+      };
+
+      // One commit with the photos and post.json, made with GitHub's Git Data API.
+      const shas: string[] = [];
+      for (const [i, content] of blobs.entries()) {
+        say(`Uploading photo ${i + 1} of ${blobs.length}…`);
+        shas.push((await gh(`/repos/${REPO}/git/blobs`, { method: 'POST', body: JSON.stringify({ content, encoding: 'base64' }) })).sha);
+      }
+      const meta = (await gh(`/repos/${REPO}/git/blobs`, { method: 'POST', body: JSON.stringify({ content: b64utf8(JSON.stringify(post, null, 2) + '\n'), encoding: 'base64' }) })).sha;
+      const tree = [...files.map((f, i) => ({ path: `inbox/${id}/${f}`, mode: '100644', type: 'blob', sha: shas[i] })), { path: `inbox/${id}/post.json`, mode: '100644', type: 'blob', sha: meta }];
+      say('Saving…');
+      for (let tries = 0; ; tries++) {
+        try {
+          const head = await gh(`/repos/${REPO}/git/ref/heads/main`);
+          const parent = await gh(`/repos/${REPO}/git/commits/${head.object.sha}`);
+          const t = await gh(`/repos/${REPO}/git/trees`, { method: 'POST', body: JSON.stringify({ base_tree: parent.tree.sha, tree }) });
+          const title = post.caption.split('\n')[0].slice(0, 60) || 'New photo';
+          const c = await gh(`/repos/${REPO}/git/commits`, { method: 'POST', body: JSON.stringify({ message: `Upload: ${title}`, tree: t.sha, parents: [head.object.sha] }) });
+          await gh(`/repos/${REPO}/git/refs/heads/main`, { method: 'PATCH', body: JSON.stringify({ sha: c.sha, force: false }) });
+          break;
+        } catch (err: any) {
+          if (err.status === 422 && tries < 4) { await new Promise((r) => setTimeout(r, 1500 * (tries + 1))); continue; } // someone else committed first: try again on top
+          throw err;
+        }
+      }
+      sent(id, sel);
+    } catch (err: any) {
+      say(err.status === 401 ? 'The upload key has stopped working. Disconnect this phone below and connect it with a new key.' : err.status === 403 || err.status === 404 ? 'The upload key isn’t allowed to add to the site. Ask Dimitri to check it.' : `Not sent: ${err.message || err}. Nothing was lost, try again.`, true);
+    } finally { btn.disabled = false; }
+  });
+
+  // ---------- after sending: wait for it to go live ----------
+  let poll = 0;
+  function sent(id: string, sel: string) {
+    $('doneImg').setAttribute('src', photos[0].url);
+    $('doneTitle').textContent = 'On its way';
+    $('doneText').textContent = 'It’ll be on the site in about 3 minutes. You can leave this page; it doesn’t need to stay open.';
+    const link = $('doneLink') as HTMLAnchorElement;
+    const near = pin && sel === 'auto' ? PLACES.map((p) => ({ ...p, d: km(pin!, p) })).sort((a, b) => a.d - b.d)[0] : null;
+    const key = sel !== 'auto' && sel !== 'new' ? sel : near && near.d <= NEAR_KM ? near.key : '';
+    link.href = key ? `/map/#${key}` : '/map/'; link.hidden = true;
+    show('done');
+    const started = Date.now();
+    clearInterval(poll);
+    poll = window.setInterval(async () => {
+      const r = await fetch(`/media/${id}-0-sm.jpg`, { method: 'HEAD', cache: 'no-store' }).catch(() => null);
+      if (r?.ok) {
+        clearInterval(poll);
+        $('doneTitle').textContent = 'It’s live';
+        $('doneText').textContent = 'Your photo is on the site now.';
+        link.hidden = false;
+      } else if (Date.now() - started > 12 * 60e3) {
+        clearInterval(poll);
+        $('doneText').textContent = 'It’s taking longer than usual. It was saved, so it will appear; if it’s still missing in an hour, let Dimitri know.';
+      }
+    }, 20000);
+  }
+  $('again').onclick = () => {
+    clearInterval(poll);
+    photos.forEach((p) => URL.revokeObjectURL(p.url)); photos = [];
+    ($('caption') as HTMLTextAreaElement).value = ''; ($('newName') as HTMLInputElement).value = ''; ($('search') as HTMLInputElement).value = '';
+    ($('date') as HTMLInputElement).value = today();
+    pin = null; marker?.remove(); marker = null;
+    $('whereText').textContent = 'Tap the map, search for a place or use where you are now.';
+    say(''); drawThumbs(); fillPlaces(); show('form');
+  };
+
+  // ---------- start ----------
+  const today = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+  ($('date') as HTMLInputElement).value = today();
+  ($('date') as HTMLInputElement).max = today();
+  drawThumbs(); fillPlaces();
+  if (getKey()) { show('form'); initMap(); } else show('connect');
+</script>

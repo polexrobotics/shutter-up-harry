@@ -79,3 +79,32 @@ export function numberPhotos(posts, previousPosts = []) {
   for (const p of ordered) for (const img of p.images) if (img.no == null) img.no = ++max;
   return posts;
 }
+
+/** Web copy and thumbnail sizes used for every photo on the site. */
+export const SIZES = { max: 1280, thumb: 400, quality: 80 };
+
+/** Map filter chips, by continent. */
+export const REGION = { OC: 'Australia & NZ', NA: 'North America', SA: 'South America', EU: 'Europe', AS: 'Asia', AF: 'Africa', AN: 'Antarctica' };
+
+/** Distance in km between two { lat, lng } points. */
+export function km(a, b) {
+  const R = 6371, t = Math.PI / 180, dl = (b.lat - a.lat) * t, dn = (b.lng - a.lng) * t;
+  const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dn / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+/** The biggest city near a point (scripts/data/cities.json), as { name, cc, d } where d is its distance in km. */
+export function nearestCity(cities, c) {
+  let pick = null, score = -1;
+  for (const [name, lat, lng, pop, cc] of cities.cities) {
+    if (Math.abs(lat - c.lat) > 1 || Math.abs(lng - c.lng) > 1.5) continue;
+    const d = km(c, { lat, lng });
+    const s = d <= 40 ? pop / (1 + (d / 20) ** 2) : -1;
+    if (s > score) { score = s; pick = { name, cc, d }; }
+  }
+  if (!pick) { // nothing big nearby: nearest town of 15k+
+    let bd = Infinity;
+    for (const [name, lat, lng, , cc] of cities.cities) { const d = km(c, { lat, lng }); if (d < bd) { bd = d; pick = { name, cc, d }; } }
+  }
+  return pick;
+}

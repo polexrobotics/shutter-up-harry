@@ -1,5 +1,5 @@
 # Builds the site and publishes it to GitHub Pages at https://shutterupharry.com.au
-# Runs on every push to main, after the Instagram sync, or by hand (Actions tab →
+# Runs on every push to main, after the Instagram sync or Add photos, or by hand (Actions tab →
 # "Deploy site" → "Run workflow").
 # One-off setup in the repo: Settings → Pages → Source: "GitHub Actions",
 # Custom domain: shutterupharry.com.au, then tick "Enforce HTTPS".
@@ -8,8 +8,10 @@ name: Deploy site
 on:
   push:
     branches: [main]
+    # New uploads are published by the "Add photos" run that processes them.
+    paths-ignore: ['inbox/**']
   workflow_run:
-    workflows: [Instagram sync]
+    workflows: [Instagram sync, Add photos]
     types: [completed]
   workflow_dispatch: {}
 
