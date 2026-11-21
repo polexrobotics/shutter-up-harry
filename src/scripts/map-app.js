@@ -223,7 +223,10 @@ let lb = { s: null, i: 0 }, lbInfo = false;
 function openLightbox(s, i) { lb = { s, i }; lbInfo = false; renderLB(); $('#lb').hidden = false; $('#lb .x').focus(); }
 function renderLB() {
   const { s, i } = lb, ph = s.photos[i];
-  const enquire = `/contact/?topic=${encodeURIComponent('Print enquiry')}&photo=${encodeURIComponent(`${ph.caption} (${s.title})`)}`;
+  // The request carries the photo itself (and its Instagram post when we know it) so Harry sees exactly which one.
+  const q = new URLSearchParams({ topic: 'Print enquiry', photo: `${ph.caption} (${s.title})`, img: ph.src, place: s.slug });
+  if (ph.permalink && ph.permalink !== site.instagram) q.set('ig', ph.permalink);
+  const enquire = `/contact/?${q}`;
   $('#lb').innerHTML = `<div class="lb-stage"><img alt="${esc(ph.caption)}" src="${ph.src}" width="${ph.w}" height="${ph.h}">
      <button class="iconbtn x" aria-label="Close photo">✕</button>
      <button class="iconbtn prev" aria-label="Previous photo">‹</button><button class="iconbtn next" aria-label="Next photo">›</button></div>
