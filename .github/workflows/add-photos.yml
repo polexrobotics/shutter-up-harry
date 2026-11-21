@@ -1,0 +1,42 @@
+# Adds the photos Harry sends from the upload page (shutterupharry.com.au/upload/) to the site.
+# The upload page commits each photo to inbox/; this turns it into a numbered photo on the map
+# (scripts/add-photos.mjs), commits that, and the "Deploy site" workflow then publishes it.
+name: Add photos
+
+on:
+  push:
+    branches: [main]
+    paths: ['inbox/**', '!inbox/failed/**']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# One run at a time, so two uploads close together can't take the same photo number.
+concurrency:
+  group: add-photos
+  cancel-in-progress: false
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Add photos from inbox/
+        run: npm run add-photos
+      - name: Commit changes
+        run: |
+          git config user.name "add-photos"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A src/data public/media inbox
+          git diff --cached --quiet && exit 0
+          git commit -m "Add photos from the upload page"
+          for i in 1 2 3 4; do git push && exit 0; sleep $((i * 5)); git pull --rebase origin main; done
+          exit 1

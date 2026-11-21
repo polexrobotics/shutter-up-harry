@@ -2,7 +2,7 @@
 import '../styles/site.css';
 import '../styles/pages.css';
 import site from '../site.config.js';
-const { title, description = `${site.name}: ${site.tagline}. Photographs on a map, from ${site.location} and further afield.`, image, bodyClass = '' } = Astro.props;
+const { noindex = false, title, description = `${site.name}: ${site.tagline}. Photographs on a map, from ${site.location} and further afield.`, image, bodyClass = '' } = Astro.props;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
 const ogImage = image ? new URL(image, Astro.site).href : undefined;
 ---
@@ -13,6 +13,7 @@ const ogImage = image ? new URL(image, Astro.site).href : undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     {ogImage && <meta property="og:image" content={ogImage} />}

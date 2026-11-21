@@ -10,7 +10,8 @@
     "sample": "node scripts/make-sample.mjs",
     "sync": "node scripts/sync-instagram.mjs",
     "refresh-token": "node scripts/refresh-token.mjs",
-    "import": "node scripts/import-export.mjs"
+    "import": "node scripts/import-export.mjs",
+    "add-photos": "node scripts/add-photos.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2",

@@ -11,6 +11,8 @@ export default {
   // The very first message sends Harry an "Activate form" email; click it once and messages arrive from then on.
   // Leave empty to have the form open the visitor's own email app instead.
   formEndpoint: 'https://formsubmit.co/ajax/harry.giannakoudakis@outlook.com.au',
+  // GitHub repo the upload page (/upload/) sends Harry's new photos to.
+  repo: 'polexrobotics/shutter-up-harry',
   // Map style. OpenFreeMap is free and needs no account. Swap for MapTiler/Stadia if you prefer.
   mapStyle: 'https://tiles.openfreemap.org/styles/positron',
 
